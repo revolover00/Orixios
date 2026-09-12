@@ -82,7 +82,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
       <div className="mt-5 px-4">
         <h2 className="mb-2 text-[11px] font-semibold text-muted-foreground">المواد</h2>
         <div className="flex flex-col gap-1">
-          {SUBJECTS.map((subject, index) => {
+          {SUBJECTS.map((subject) => {
             const href = `/session/${subject.id}`;
             return (
               <Link

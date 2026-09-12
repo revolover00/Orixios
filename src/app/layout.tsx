@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 <script key="theme-script" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 </head>
       <body className="bg-background text-foreground antialiased">
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

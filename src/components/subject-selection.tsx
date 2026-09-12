@@ -101,6 +101,7 @@ export function SubjectSelection() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          aria-label="ابحث عن مادة"
           placeholder="ابحث عن مادة، مثلاً: رياضيات، فيزياء..."
           className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/60"
         />
