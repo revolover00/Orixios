@@ -1,0 +1,36 @@
+/**
+ * أخطاء طبقة المعرفة الموثوقة + الرسالة القياسية لخارج المصدر.
+ */
+
+export type KnowledgeErrorCode = 'UNKNOWN_SUBJECT' | 'NO_CONTENT_AVAILABLE';
+
+export const KNOWLEDGE_ERROR_MESSAGES: Record<KnowledgeErrorCode, string> = {
+  UNKNOWN_SUBJECT: 'المادة المطلوبة غير معروفة في نظام المعرفة.',
+  NO_CONTENT_AVAILABLE: 'لا يوجد محتوى موثوق متاح لهذا الطلب.',
+};
+
+export interface KnowledgeErrorOptions {
+  subjectId?: string;
+  topic?: string;
+  message?: string;
+}
+
+export class KnowledgeError extends Error {
+  readonly code: KnowledgeErrorCode;
+  readonly subjectId?: string;
+  readonly topic?: string;
+
+  constructor(code: KnowledgeErrorCode, options?: KnowledgeErrorOptions) {
+    super(options?.message ?? KNOWLEDGE_ERROR_MESSAGES[code]);
+    this.name = 'KnowledgeError';
+    this.code = code;
+    this.subjectId = options?.subjectId;
+    this.topic = options?.topic;
+  }
+}
+
+/**
+ * الرسالة القياسية الوحيدة المستخدمة عندما تكون الجزئية خارج المصدر المتاح.
+ * معرّفة هنا مرة واحدة فقط ولا تُكرَّر في ملفات أخرى.
+ */
+export const OUT_OF_SOURCE_MESSAGE = 'الجزئية دي مش موجودة في المصدر المتاح حاليًا.';

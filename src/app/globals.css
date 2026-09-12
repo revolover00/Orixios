@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* Design Tokens — أسماء دلالية تُعرَّف مرة واحدة وتُستهلك في كل الواجهة */
+/* الوضع الداكن هو الافتراضي (يُضاف صنف .dark على عنصر html قبل الرسم)  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --background: #f5f4f0;
+  --foreground: #22262c;
+  --surface: #fbfaf7;
+  --surface-muted: #efeee8;
+  --surface-hover: #e7e6de;
+  --border: #dcdad1;
+  --border-strong: #c2bfb3;
+  --muted-foreground: #666e79;
+  --primary: #0e7c6b;
+  --primary-foreground: #f2fbf9;
+  --danger: #b3452f;
+  --warning: #8a6210;
+  --success: #1e7a4f;
+  --input: #ffffff;
+  --ring: #0e7c6b;
+}
+
+.dark {
+  --background: #0e1013;
+  --foreground: #e7e9ec;
+  --surface: #14171b;
+  --surface-muted: #1a1e24;
+  --surface-hover: #21262e;
+  --border: #262c34;
+  --border-strong: #39424e;
+  --muted-foreground: #99a2ad;
+  --primary: #2fbfa4;
+  --primary-foreground: #07231d;
+  --danger: #e5705f;
+  --warning: #d9a44a;
+  --success: #57b58a;
+  --input: #111418;
+  --ring: #2fbfa4;
+}
+
+/* ربط الرموز بنظام ألوان Tailwind (v4) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* انتقالات قصيرة وهادئة فقط، مع احترام تقليل الحركة */
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease,
+      opacity 120ms ease;
+  }
+}
+
+/* نقاط مؤشر التفكير */
+@keyframes tutor-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tutor-dot {
+    animation: tutor-dot 1.2s infinite ease-in-out;
+  }
+  .tutor-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .tutor-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutor-dot {
+    opacity: 0.7;
+  }
+}
