@@ -27,6 +27,10 @@ export interface ProviderRegistryEntry extends ProviderConfig {
   isPlaceholder: boolean;
 }
 
+export function isDevTestingMode(): boolean {
+  return process.env.DEV_TESTING_MODE === 'true';
+}
+
 export const PROVIDERS: Record<ProviderName, ProviderRegistryEntry> = {
   gemini: {
     name: 'gemini',
@@ -59,7 +63,7 @@ export const PROVIDERS: Record<ProviderName, ProviderRegistryEntry> = {
   mock: {
     name: 'mock',
     displayName: 'مزود المحاكاة التطويري',
-    enabled: true,
+    enabled: isDevTestingMode(),
     supportsReasoning: false,
     description: 'محاكاة محلية للاستجابة وفق مصادر الجلسة، دون أي استدعاء خارجي',
     isSimulation: true,
@@ -91,9 +95,7 @@ export function listEnabledProviders(): ProviderRegistryEntry[] {
  * Is development testing mode active?
  * The only allowed reading of the mode's environment variable.
  */
-export function isDevTestingMode(): boolean {
-  return process.env.DEV_TESTING_MODE === 'true';
-}
+
 
 export const DEV_FALLBACK_KEY_ID = 'dev-fallback-gemini-key';
 
