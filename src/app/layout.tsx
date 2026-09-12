@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import { AppShell } from '@/components/layout/app-shell';
@@ -10,16 +9,6 @@ const arabicFont = IBM_Plex_Sans_Arabic({
   weight: ['400', '500', '600', '700'],
 });
 
-export const metadata: Metadata = {
-  title: 'Orixios — مدرّسك الذكي',
-  description:
-    'Orixios منصة تعليمية مع مدرّس ذكي يشرح بالاعتماد على مصادر موثوقة. المرحلة الحالية: أساس شات المدرّس.',
-};
-
-/**
- * Script applies the saved theme before the first render to prevent a flash of incorrect theme.
- * Default when no choice is present: dark mode.
- */
 const themeInitScript = `(function(){try{var s=localStorage.getItem('${THEME_STORAGE_KEY}');var m=(s==='light'||s==='system')?s:'dark';var d=(m==='dark')||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){document.documentElement.classList.add('dark');}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
