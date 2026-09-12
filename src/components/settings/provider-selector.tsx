@@ -1,9 +1,9 @@
 /**
- * اختيار مزود الذكاء الاصطناعي في نموذج إضافة المفتاح.
- * - Gemini مفعّل.
- * - OpenRouter وGitHub Models عناصر نائبة تظهر بحالة "غير متاح حاليًا"
- *   ويُمنع الحفظ لها.
- * - أداة المحاكاة التطويرية المحلية خيار تطوير منفصل (ليست خدمة خارجية).
+ * AI provider selection in the key addition form.
+ * - Gemini is active.
+ * - OpenRouter and GitHub Models are placeholders that appear as "currently unavailable"
+ *   and saving is prevented for them.
+ * - The local development simulator tool is a separate development option (not an external service).
  */
 
 'use client';

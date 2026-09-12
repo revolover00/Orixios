@@ -1,8 +1,8 @@
 /**
- * زر تبديل الثيم: داكن ← فاتح ← حسب النظام ← داكن.
- * - يحفظ الاختيار محليًا.
- * - لا يسبب hydration mismatch (لقطة الخادم ثابتة).
- * - يعمل بلوحة المفاتيح (زر حقيقي) وله تسمية واضحة.
+ * Theme toggle button: Dark → Light → System → Dark.
+ * - Saves the selection locally.
+ * - Does not cause hydration mismatch (server snapshot is stable).
+ * - Works with keyboard (real button) and has a clear label.
  */
 
 'use client';

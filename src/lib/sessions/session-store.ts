@@ -1,12 +1,12 @@
 /**
- * مخزن الجلسات المؤقت (Mock).
+ * Temporary session store (Mock).
  *
- * التصميم:
- * - التخزين (SessionStorage) مفصول تمامًا عن منطق الجلسات (SessionStore)،
- *   ما يجعل الانتقال لاحقًا إلى Supabase ممكنًا دون تغيير واجهة الطبقة.
- * - لا تُستخدم قاعدة بيانات حقيقية في هذه المرحلة.
- * - مادة الجلسة ثابتة عند الإنشاء ولا يمكن تعديلها أبدًا.
- * - الجلسات المنتهية لا يمكن استخدامها.
+ * Design:
+ * - Storage (SessionStorage) is completely separated from session logic (SessionStore),
+ *   making a later transition to Supabase possible without changing the layer interface.
+ * - No real database is used at this stage.
+ * - Session subject is fixed at creation and can never be modified.
+ * - Ended sessions cannot be used.
  */
 
 import type { SubjectId, TutorSession } from '@/types/sessions';
@@ -18,8 +18,8 @@ export interface CreateSessionInput {
   studentId: string;
   subjectId: SubjectId;
   /**
-   * معرّف صريح اختياري: ضروري عندما يملك المتصل معرّف جلسة ثابتًا
-   * (مثل جلسة الشات المرتبطة بالرابط). بدون ذلك يُولَّد UUID تلقائيًا.
+   * Optional explicit ID: necessary when the caller has a fixed session ID
+   * (e.g., chat session linked to the URL). Otherwise, a UUID is automatically generated.
    */
   id?: string;
 }
@@ -44,12 +44,12 @@ export interface SessionStore {
 }
 
 /**
- * معرّف الطالب المحلي المؤقت: في هذه المرحلة لا توجد مصادقة بعد،
- * ولاحقًا يُستبدل بمعرّف مستخدم Supabase دون تغيير واجهة الطبقة.
+ * Temporary local student ID: at this stage, no authentication yet,
+ * and later it will be replaced with a Supabase user ID without changing the layer interface.
  */
 export const LOCAL_STUDENT_ID = 'local-student';
 
-/** تخزين في الذاكرة لأغراض التطوير فقط. */
+/** In-memory storage for development purposes only. */
 class InMemorySessionStorage implements SessionStorage {
   private readonly sessions = new Map<string, TutorSession>();
 
@@ -70,7 +70,7 @@ class BaseSessionStore implements SessionStore {
   constructor(private readonly storage: SessionStorage) {}
 
   createSession(input: CreateSessionInput): TutorSession {
-    // لا تُنشأ جلسة لمادة غير موجودة أو غير نشطة.
+    // A session is not created for a non-existent or inactive subject.
     if (!isValidSubjectId(input.subjectId)) {
       throw new SessionError('INVALID_SUBJECT', { subjectId: input.subjectId });
     }
@@ -81,7 +81,7 @@ class BaseSessionStore implements SessionStore {
 
     const sessionId = input.id ?? crypto.randomUUID();
 
-    // منع إنشاء جلسة فوق معرّف موجود بالفعل.
+    // Prevent creating a session over an already existing ID.
     if (this.storage.get(sessionId)) {
       throw new SessionError('SESSION_ALREADY_EXISTS', { sessionId });
     }
@@ -117,10 +117,10 @@ class BaseSessionStore implements SessionStore {
   }
 
   /**
-   * فرض قفل المادة على الجلسة:
-   * - جلسة غير موجودة ← SESSION_NOT_FOUND.
-   * - جلسة منتهية ← SESSION_ENDED.
-   * - مادة مختلفة ← SUBJECT_MISMATCH دون أي تعديل على الجلسة.
+   * Enforce subject lock on the session:
+   * - Non-existent session → SESSION_NOT_FOUND.
+   * - Ended session → SESSION_ENDED.
+   * - Different subject → SUBJECT_MISMATCH without any modification to the session.
    */
   assertSessionSubject(input: AssertSessionSubjectInput): TutorSession {
     if (!isValidSubjectId(input.subjectId)) {
@@ -172,5 +172,5 @@ class BaseSessionStore implements SessionStore {
   }
 }
 
-/** نسخة وحيدة على مستوى الخادم للتطبيق المؤقت. */
+/** Single server-side instance for temporary application. */
 export const sessionStore: SessionStore = new BaseSessionStore(new InMemorySessionStorage());

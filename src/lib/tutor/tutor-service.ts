@@ -1,21 +1,21 @@
 /**
- * خدمة الشات: منطق العمل الأساسي، مفصولًا عن طبقة الـ HTTP.
+ * Chat service: core business logic, separated from the HTTP layer.
  *
- * المسار الكامل (غير التدفقي): "processTutorRequest".
- * مسار البث: "startTutorStream" — يجري كل التحقق قبل بدء البث،
- * ثم يرجع أحداثًا (token / done / error) عبر بروتوكول البث الموحد.
+ * Full (non-streaming) path: "processTutorRequest".
+ * Streaming path: "startTutorStream" — performs all validation before starting the stream,
+ * then returns events (token / done / error) via the unified streaming protocol.
  *
- * ترتيب المعالجة المشترك:
- * 1. التحقق من الجلسة.
- * 2. التحقق من تطابق المادة (قفل المادة).
- * 3. تحميل المادة من الكتالوج.
- * 4. تحميل السياق الموثوق.
- * 5. بناء system prompt.
- * 6. اختيار المفتاح والمزود.
- * 7. إرسال الرسائل (كاملًا أو بثًا).
- * 8. تصنيف الأخطاء.
- * 9. تحديث حالة المفتاح عند الحاجة.
- * 10. إرجاع استجابة آمنة.
+ * Shared processing order:
+ * 1. Session validation.
+ * 2. Subject match validation (subject lock).
+ * 3. Load subject from catalog.
+ * 4. Load grounded context.
+ * 5. Build system prompt.
+ * 6. Key and provider selection.
+ * 7. Send messages (full or streaming).
+ * 8. Error classification.
+ * 9. Update key status when needed.
+ * 10. Return a safe response.
  */
 
 import { classifyProviderError, isAbortError, ProviderError } from '@/lib/ai-providers/errors';
@@ -54,16 +54,16 @@ export interface TutorServiceInput {
   keys: UserKeyCredential[];
 }
 
-/** اعتماديات قابلة للحقن للاختبار دون أي استدعاء خارجي. */
+/** Injectable dependencies for testing without any external calls. */
 export interface TutorServiceDeps {
   createClient?: (provider: ProviderName) => ProviderClient;
-  /** يمكن استبدال مخزن الجلسات في الاختبار أو عند الانتقال إلى Supabase. */
+  /** Session store can be replaced in testing or when migrating to Supabase. */
   sessionStore?: SessionStore;
-  /** إشارة إلغاء الطلب (تُمرر إلى المزود). */
+  /** Request cancellation signal (passed to the provider). */
   signal?: AbortSignal;
 }
 
-/* ------------------------- السياق المشترك المحضَّر ------------------------ */
+/* ------------------------- Prepared Shared Context ------------------------ */
 
 interface PreparedContext {
   systemPrompt: string;
@@ -74,8 +74,8 @@ type PrepareResult =
   | { ok: false; response: TutorApiResponse };
 
 /**
- * كل التحقق الذي يجب أن يسبق أي استدعاء مزود (سواء كاملًا أو بثًا):
- * الجلسة، قفل المادة، الكتالوج، السياق الموثوق، وبناء الـ prompt.
+ * All validation that must precede any provider call (whether full or streaming):
+ * Session, subject lock, catalog, grounded context, and prompt building.
  */
 function prepareTutorContext(input: TutorServiceInput, sessions: SessionStore): PrepareResult {
   const session = sessions.getSession(input.sessionId);
@@ -126,7 +126,7 @@ function prepareTutorContext(input: TutorServiceInput, sessions: SessionStore): 
   return { ok: true, context: { systemPrompt } };
 }
 
-/** العميل يرسل المفاتيح الصالحة مرتبة بالأولوية؛ الأول هو الافتراضي. */
+/** The client sends valid keys sorted by priority; the first is the default. */
 function toUserApiKey(credential: UserKeyCredential, index: number): UserApiKey {
   return {
     ...credential,
@@ -137,7 +137,7 @@ function toUserApiKey(credential: UserKeyCredential, index: number): UserApiKey 
   };
 }
 
-/** ترتيب المفاتيح النشطة: الافتراضي أولًا ثم حسب تاريخ الإنشاء. */
+/** Active keys order: default first, then by creation date. */
 function prioritizeInputKeys(keys: UserApiKey[]): UserApiKey[] {
   const active = keys.filter((key) => key.status === 'active');
   const sorted = [...active].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -149,7 +149,7 @@ function prioritizeInputKeys(keys: UserApiKey[]): UserApiKey[] {
   return [defaultKey, ...sorted];
 }
 
-/* ----------------------------- المسار الكامل ------------------------------ */
+/* ----------------------------- Full Path ------------------------------ */
 
 export async function processTutorRequest(
   input: TutorServiceInput,
@@ -176,7 +176,7 @@ export async function processTutorRequest(
     return buildErrorResponse(safeTutorError(hasActive ? 'PROVIDER_UNKNOWN' : 'ALL_KEYS_EXHAUSTED'));
   }
 
-  // حلقة محدودة: محاولة واحدة لكل مفتاح، ولا حلقات مفتوحة.
+  // Limited loop: one attempt per key, no infinite loops.
   const attempted = new Set<string>();
   const keyStatusUpdates: KeyStatusUpdate[] = [];
 
@@ -205,7 +205,7 @@ export async function processTutorRequest(
       };
     } catch (error) {
       if (isAbortError(error)) {
-        // إلغاء المستخدم ليس خطأ دائمًا ولا يغيّر حالة المفتاح.
+        // User cancellation is not always an error and does not change key status.
         return buildErrorResponse(
           safeTutorError('NETWORK_ERROR', 'أُلغي الطلب.'),
           keyStatusUpdates,
@@ -228,12 +228,12 @@ export async function processTutorRequest(
   return buildErrorResponse(safeTutorError('ALL_KEYS_EXHAUSTED'), keyStatusUpdates);
 }
 
-/* ------------------------------- مسار البث -------------------------------- */
+/* ------------------------------- Streaming Path -------------------------------- */
 
 export type TutorStreamOutcome =
-  /** فشل معروف قبل بدء البث: يُعاد كرد JSON عادي موحد. */
+  /** Known failure before streaming starts: returned as a unified normal JSON response. */
   | { ok: false; response: TutorApiResponse }
-  /** نجح التأسيس: أحداث البث جاهزة (token ثم done، أو error أثناء البث). */
+  /** Setup successful: streaming events are ready (token then done, or error during streaming). */
   | { ok: true; events: AsyncIterable<TutorStreamEvent> };
 
 interface EstablishedStream {
@@ -244,11 +244,11 @@ interface EstablishedStream {
 }
 
 /**
- * بدء بث رد المدرّس.
+ * Start streaming the tutor's response.
  *
- * كل التحقق واختيار المفتاح وتجربة أول جزء يحدث قبل إرجاع الأحداث؛
- * لذلك أخطاء مثل "مفتاح غير صالح" أو "لا مفاتيح" تُعاد كفشل قبل البث،
- * بينما الأخطاء الواقعة بعد وصول نص تُسلَّم كحدث "error" داخل البث.
+ * All validation, key selection, and first part attempt happen before returning events;
+ * therefore, errors like "invalid key" or "no keys" are returned as a pre-streaming failure,
+ * while errors occurring after text arrives are delivered as an "error" event within the stream.
  */
 export async function startTutorStream(
   input: TutorServiceInput,
@@ -302,7 +302,7 @@ export async function startTutorStream(
         });
         iterator = iterable[Symbol.asyncIterator]();
       } else {
-        // احتياط غير تدفقي: المزود لا يدعم البث؛ نغلّف الرد الكامل كحدث واحد.
+        // Non-streaming fallback: provider does not support streaming; wrap the full response as a single event.
         const result = await client.generateResponse({
           systemPrompt: prepared.context.systemPrompt,
           messages: input.messages,
@@ -318,7 +318,7 @@ export async function startTutorStream(
         })()[Symbol.asyncIterator]();
       }
 
-      // اختبار المفتاح بأول جزء قبل الالتزام بالبث.
+      // Test the key with the first part before committing to streaming.
       const first = await iterator.next();
       established = {
         iterator,
@@ -329,7 +329,7 @@ export async function startTutorStream(
       break;
     } catch (error) {
       if (isAbortError(error)) {
-        // إلغاء المستخدم قبل البث: لا خطأ دائمًا ولا تغيير لحالة المفتاح.
+        // User cancellation before streaming: not always an error and no change to key status.
         return {
           ok: false,
           response: buildErrorResponse(safeTutorError('NETWORK_ERROR', 'أُلغي الطلب.')),
@@ -339,7 +339,7 @@ export async function startTutorStream(
         error instanceof ProviderError ? error : classifyProviderError(error, key.provider);
       if (providerError.code === 'QUOTA_EXCEEDED') {
         preStreamUpdates.push({ keyId: key.id, status: 'exhausted' });
-        continue; // جرّب مفتاحًا نشطًا آخر مرة واحدة.
+        continue; // Try another active key once.
       }
       if (providerError.code === 'INVALID_API_KEY') {
         preStreamUpdates.push({ keyId: key.id, status: 'invalid' });
@@ -392,7 +392,7 @@ export async function startTutorStream(
       yield { type: 'done', usage, keyStatusUpdates: updates };
     } catch (error) {
       if (isAbortError(error) || signal?.aborted) {
-        // إلغاء العميل: نغلق بصمت دون خطأ أو تغيير لحالة المفتاح.
+        // Client cancellation: close silently without error or changing key status.
         return;
       }
       const providerError =
@@ -417,7 +417,7 @@ export async function startTutorStream(
       try {
         await stream.iterator.return?.();
       } catch {
-        // إغلاق المورد الثانوي ليس خطأ يستحق التصعيد.
+        // Closing the secondary resource is not an error worth escalating.
       }
     }
   }

@@ -1,8 +1,8 @@
 /**
- * الهيكل العام للتطبيق: شريط جانبي + منطقة محتوى رئيسية.
- * - سطح المكتب: الشريط الجانبي ثابت.
- * - الهاتف: يتحول إلى Drawer يفتح بزر القائمة.
- * - لا يعرض بيانات غير موجودة فعليًا (سجل الجلسات فارغ حتى تُنفذ الميزة).
+ * The general structure of the application: sidebar + main content area.
+ * - Desktop: The sidebar is fixed.
+ * - Phone: Transforms into a Drawer that opens with the menu button.
+ * - Does not display data that does not actually exist (session history is empty until the feature is implemented).
  */
 
 'use client';
@@ -140,12 +140,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background text-foreground">
-      {/* الشريط الجانبي — سطح المكتب */}
+      {/* Sidebar — Desktop */}
       <aside className="hidden w-72 shrink-0 border-e border-border bg-surface lg:block">
         <SidebarContent onNavigate={closeMobile} />
       </aside>
 
-      {/* الشريط الجانبي — الهاتف (Drawer) */}
+      {/* Sidebar — Phone (Drawer) */}
       {mobileOpen ? (
         <div
           className="fixed inset-0 z-30 bg-background/70 lg:hidden"
@@ -163,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* شريط علوي صغير — الهاتف فقط */}
+        {/* Small top bar — Phone only */}
         <header className="flex items-center justify-between gap-2 border-b border-border bg-surface px-4 py-2.5 lg:hidden">
           <div className="flex items-center gap-2">
             <button

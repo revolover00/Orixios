@@ -1,8 +1,8 @@
 /**
- * حقل إدخال الرسائل مع زر إرسال داخلي.
- * - Enter للإرسال، وShift+Enter لسطر جديد.
- * - لا تُرسل رسالة فارغة أو مسافات فقط.
- * - يعطَّل الإدخال أثناء الإرسال لمنع التكرار.
+ * Message input field with an internal send button.
+ * - Enter to send, Shift+Enter for a new line.
+ * - Does not send empty messages or only spaces.
+ * - Input is disabled during sending to prevent duplication.
  */
 
 'use client';
@@ -12,9 +12,9 @@ import { useState, type KeyboardEvent } from 'react';
 interface ChatInputProps {
   disabled: boolean;
   onSubmit: (content: string) => void;
-  /** هل يوجد بث جارٍ الآن؟ يظهر زر الإيقاف بدل زر الإرسال أثناءه. */
+  /** Is a stream currently active? The stop button appears instead of the send button during it. */
   streaming?: boolean;
-  /** إيقاف البث الجاري عبر AbortController. */
+  /** Stop the current stream via AbortController. */
   onStop?: () => void;
 }
 

@@ -1,8 +1,8 @@
 /**
- * قائمة رسائل الشات بترتيبها الزمني، مع حالة فارغة وتمرير ذكي.
- * - تميّز بوضوح بين رسالة الطالب ورسالة المدرّس في اتجاه RTL.
- * - أثناء البث: التمرير التلقائي فقط إذا كان المستخدم قريبًا من النهاية،
- *   حتى لا يُجبر على النزول أثناء قراءة رسالة قديمة.
+ * Chat message list in chronological order, with empty state and smart scrolling.
+ * - Clearly distinguishes between student and tutor messages in RTL direction.
+ * - During streaming: automatic scrolling only if the user is near the end,
+ *   so as not to force them down while reading an old message.
  */
 
 'use client';
@@ -18,7 +18,7 @@ interface MessageListProps {
   subjectName: string;
 }
 
-/** المسافة من الأسفل التي يعتبر المستخدم عندها "قريبًا من النهاية". */
+/** The distance from the bottom at which the user is considered "near the end". */
 const NEAR_BOTTOM_THRESHOLD = 120;
 
 export function MessageList({ messages, isThinking, subjectName }: MessageListProps) {

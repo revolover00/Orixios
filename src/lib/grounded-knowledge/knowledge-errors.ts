@@ -1,5 +1,5 @@
 /**
- * أخطاء طبقة المعرفة الموثوقة + الرسالة القياسية لخارج المصدر.
+ * Grounded knowledge layer errors + standard message for out-of-source.
  */
 
 export type KnowledgeErrorCode = 'UNKNOWN_SUBJECT' | 'NO_CONTENT_AVAILABLE';
@@ -30,7 +30,7 @@ export class KnowledgeError extends Error {
 }
 
 /**
- * الرسالة القياسية الوحيدة المستخدمة عندما تكون الجزئية خارج المصدر المتاح.
- * معرّفة هنا مرة واحدة فقط ولا تُكرَّر في ملفات أخرى.
+ * The only standard message used when the snippet is outside the available source.
+ * Defined here only once and not repeated in other files.
  */
 export const OUT_OF_SOURCE_MESSAGE = 'الجزئية دي مش موجودة في المصدر المتاح حاليًا.';

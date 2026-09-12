@@ -1,12 +1,12 @@
 /**
- * POST /api/sessions — إنشاء جلسة جديدة لمادة.
+ * POST /api/sessions — Create a new session for a subject.
  *
- * ضرورة تشغيلية: واجهة الشات تتحقق من وجود الجلسة قبل أي طلب
- * (ولا يُسمح بإنشاء ضمني داخل /api/tutor)، لذلك تحتاج الواجهة
- * نقطة صريحة لإنشاء الجلسات.
+ * Operational necessity: The chat interface checks for the existence of a session before any request
+ * (and implicit creation is not allowed within /api/tutor), so the interface needs
+ * an explicit endpoint for creating sessions.
  *
- * الطالب في هذه المرحلة هو الطالب المحلي المؤقت؛ لاحقًا يأتي
- * المعرّف من مصادقة Supabase.
+ * The student at this stage is the temporary local student; later, the ID will come
+ * from Supabase authentication.
  */
 
 import { NextResponse } from 'next/server';
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof SessionError) {
       const body = sessionErrorToTutorError(error);
-      // المادة غير الموجودة/غير المتاحة تعامل كمورد غير موجود (404).
+      // Non-existent/unavailable subject is treated as a not-found resource (404).
       const status = error.code === 'INVALID_SUBJECT' ? 404 : 500;
       return NextResponse.json(buildErrorResponse(body), { status });
     }

@@ -1,15 +1,15 @@
 /**
- * تحميل المحتوى الموثوق وبناء سياقه.
+ * Loading grounded content and building its context.
  *
- * قواعد صارمة:
- * - لا يُحمَّل محتوى من مادة مختلفة أبدًا.
- * - لا يُرجع محتوى غير نشط.
- * - عند غياب المحتوى: مصفوفة فارغة و "hasAvailableSource = false"،
- *   دون توليد بديل أو استخدام مادة قريبة أو اختراع سياق.
- * - لا تُستخدم مصادر خارج الـ Mock Data في هذه المرحلة.
+ * Strict rules:
+ * - Content from a different subject is never loaded.
+ * - Inactive content is not returned.
+ * - When content is absent: empty array and "hasAvailableSource = false",
+ *   without generating alternatives, using a similar subject, or inventing context.
+ * - No sources outside Mock Data are used at this stage.
  *
- * نقطة التوسعة: عند إضافة Supabase يُستبدل مصدر البيانات داخل هذه
- * الوحدة فقط، مع الحفاظ على نفس التواقيع.
+ * Extension point: when Supabase is added, the data source will be replaced within this
+ * module only, while maintaining the same signatures.
  */
 
 import type { GroundedContent, GroundedContextResult } from '@/types/grounded-content';
@@ -18,7 +18,7 @@ import { getSubjectById, isValidSubjectId } from '@/lib/sessions/subject-catalog
 import { KnowledgeError } from './knowledge-errors';
 import { MOCK_GROUNDED_CONTENT } from './mock-content';
 
-/** تسميات عرض أنواع المصادر داخل السياق. */
+/** Display labels for source types within the context. */
 const SOURCE_TYPE_LABELS: Record<GroundedContent['sourceType'], string> = {
   teacher_transcript: 'Teacher transcript',
   whiteboard: 'Whiteboard',
@@ -45,9 +45,9 @@ function normalizeForTopicMatch(value: string): string {
 }
 
 /**
- * يحمّل المحتوى النشط لمادة واحدة فقط.
- * يرمي KnowledgeError(UNKNOWN_SUBJECT) لمادة غير معروفة،
- * ويرجّع مصفوفة فارغة لمادة معروفة بلا محتوى.
+ * Loads active content for a single subject only.
+ * Throws KnowledgeError(UNKNOWN_SUBJECT) for an unknown subject,
+ * and returns an empty array for a known subject with no content.
  */
 export function getGroundedContentForSubject(subjectId: string): GroundedContent[] {
   const validSubjectId = requireValidSubject(subjectId);
@@ -57,9 +57,9 @@ export function getGroundedContentForSubject(subjectId: string): GroundedContent
 }
 
 /**
- * يحمّل محتوى موضوع محدد داخل مادة.
- * بدون موضوع: كل محتوى المادة. عند غياب الموضوع: مصفوفة فارغة
- * (لا نخلط موضوعات أخرى ولا نقترح مواد قريبة).
+ * Loads content for a specific topic within a subject.
+ * Without a topic: all subject content. If topic is absent: empty array
+ * (we don't mix other topics or suggest similar subjects).
  */
 export function getGroundedContentForTopic(input: {
   subjectId: string;
@@ -80,9 +80,9 @@ export function getGroundedContentForTopic(input: {
 }
 
 /**
- * يبني نتيجة السياق الموثوق الكاملة.
- * عند غياب المصادر: "hasAvailableSource = false" وسياق فارغ تمامًا،
- * ولا يُولَّد أي محتوى بديل.
+ * Builds the complete grounded context result.
+ * When sources are absent: "hasAvailableSource = false" and completely empty context,
+ * and no alternative content is generated.
  */
 export function resolveGroundedContext(input: {
   subjectId: string;
@@ -130,8 +130,8 @@ export function resolveGroundedContext(input: {
 }
 
 /**
- * يبني نص السياق الموثوق الجاهز للتمرير إلى system prompt لاحقًا.
- * يرجّع نصًا فارغًا عندما لا يوجد مصدر مناسب.
+ * Builds the grounded context text ready to be passed to the system prompt later.
+ * Returns an empty string when no suitable source exists.
  */
 export function buildGroundedContext(input: {
   subjectId: string;

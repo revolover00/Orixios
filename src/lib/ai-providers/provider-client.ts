@@ -1,11 +1,11 @@
 /**
- * عملاء المزودات الموحّدون.
+ * Unified provider clients.
  *
- * - لا تضع أي مكوّن React استدعاءً مباشرًا لمزود؛ كل الاستدعاءات تمر هنا.
- * - المنفّذ حاليًا: Gemini فعليًا، ومزود محاكاة تطويري محلي.
- * - OpenRouter وGitHub Models عناصر نائبة ترفض التنفيذ بخطأ واضح.
- * - التصميم يسمح بإضافة Streaming لاحقًا (إضافة دالة جديدة للواجهة
- *   دون كسر generateResponse الحالية).
+ * - No React component should make direct calls to a provider; all calls pass through here.
+ * - Currently implemented: actual Gemini, and a local development simulation provider.
+ * - OpenRouter and GitHub Models are placeholders that reject execution with a clear error.
+ * - The design allows for adding Streaming later (adding a new function to the interface
+ *   without breaking the current generateResponse).
  */
 
 import { createGoogle } from '@ai-sdk/google';
@@ -18,10 +18,10 @@ import type { ProviderGenerateRequest, ProviderStreamRequest } from './provider-
 import type { ProviderGenerateResponse, ProviderStreamChunk } from './provider-response';
 
 /**
- * عميل مزود موحد:
- * - "generateResponse" للتوليد الكامل — إلزامي لكل مزود.
- * - "streamResponse" للبث التدريجي — اختياري؛ ومن لا يدعمه تستخدم طبقة
- *   الخدمة مسار التوليد الكامل كاحتياط آمن.
+ * Unified provider client:
+ * - "generateResponse" for full generation — mandatory for every provider.
+ * - "streamResponse" for progressive streaming — optional; providers that don't support it use the service layer's
+ *   full generation path as a safe fallback.
  */
 export interface ProviderClient {
   readonly providerName: ProviderName;
@@ -35,7 +35,7 @@ function createGeminiClient(): ProviderClient {
   return {
     providerName: 'gemini',
     async generateResponse({ systemPrompt, messages, apiKey, model }) {
-      // يُنشأ المزود بمفتاح المستخدم صراحةً، ولا يُعتمد على أي متغير بيئة.
+      // The provider is created explicitly with the user's key, and does not rely on any environment variable.
       const google = createGoogle({ apiKey });
       const modelId = model ?? getProviderConfig('gemini').defaultModel ?? 'gemini-2.5-flash';
 
@@ -45,7 +45,7 @@ function createGeminiClient(): ProviderClient {
         messages,
       });
 
-      // الاستدلال يأتي كأجزاء؛ ندمج الأجزاء النصية فقط.
+      // Inference comes in parts; we combine only the text parts.
       const reasoningText = result.reasoning
         .map((part) => (part.type === 'reasoning' ? part.text : ''))
         .filter((part) => part.length > 0)
@@ -61,11 +61,11 @@ function createGeminiClient(): ProviderClient {
       };
     },
     async streamResponse({ systemPrompt, messages, apiKey, model, signal }) {
-      // يُنشأ المزود بمفتاح المستخدم صراحةً، ولا يُعتمد على أي متغير بيئة.
+      // The provider is created explicitly with the user's key, and does not rely on any environment variable.
       const google = createGoogle({ apiKey });
       const modelId = model ?? getProviderConfig('gemini').defaultModel ?? 'gemini-2.5-flash';
 
-      // إشارة الإلغاء تمرر مباشرة حتى يتوقف استهلاك النموذج عند إلغاء العميل.
+      // The cancellation signal is passed directly so that model consumption stops when the client cancels.
       const result = streamText({
         model: google(modelId),
         system: systemPrompt,
@@ -94,9 +94,9 @@ function createGeminiClient(): ProviderClient {
   };
 }
 
-/* ------------------------- مزود المحاكاة التطويري ------------------------ */
+/* ------------------------- Development Simulation Provider ------------------------ */
 
-/** يقرأ موضوعات المصادر من الـ system prompt (بين علامتي التغليف). */
+/** Reads source topics from the system prompt (between wrapping tags). */
 function extractTopicsFromSystemPrompt(systemPrompt: string): string[] {
   const start = systemPrompt.indexOf(GROUNDED_SOURCES_START);
   const end = systemPrompt.indexOf(GROUNDED_SOURCES_END);
@@ -140,10 +140,10 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * محاكاة محلية: تبني ردًا مدرّسيًا سقراطيًا وفق الموضوعات المضمنة
- * في الـ system prompt فقط، دون أي اتصال خارجي.
+ * Local simulation: builds a Socratic tutor response based on the topics embedded
+ * in the system prompt only, without any external connection.
  */
-/** يبني رد مزود المحاكاة اعتمادًا على الموضوعات المضمنة في الـ prompt فقط. */
+/** Builds the simulation provider's response based on the topics embedded in the prompt only. */
 function buildMockReply(systemPrompt: string, question: string): string {
   const topics = extractTopicsFromSystemPrompt(systemPrompt);
 
@@ -184,14 +184,14 @@ function createMockClient(): ProviderClient {
   return {
     providerName: 'mock',
     async generateResponse({ systemPrompt, messages }) {
-      await sleep(450); // محاكاة زمن الاستجابة
+      await sleep(450); // Simulate response time
       const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
       return { text: buildMockReply(systemPrompt, lastUserMessage?.content ?? '') };
     },
     async streamResponse({ systemPrompt, messages, signal }) {
       const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
       const reply = buildMockReply(systemPrompt, lastUserMessage?.content ?? '');
-      // تقسيم يحافظ على المسافات حتى يصل النص سليمًا عند التجميع.
+      // Splitting preserves spaces so that the text arrives intact when assembled.
       const pieces = reply.split(/(\s+)/).filter((piece) => piece.length > 0);
 
       async function* parts(): AsyncGenerator<ProviderStreamChunk> {
@@ -210,11 +210,11 @@ function createMockClient(): ProviderClient {
   };
 }
 
-/* ------------------------------ الاختيار --------------------------------- */
+/* ------------------------------ Selection --------------------------------- */
 
 /**
- * إرجاع عميل المزود المناسب. العناصر النائبة غير المفعّلة
- * ترفض التنفيذ فورًا بخطأ واضح بدل أي سلوك صامت.
+ * Returns the appropriate provider client. Inactive placeholders
+ * immediately reject execution with a clear error instead of any silent behavior.
  */
 export function getProviderClient(provider: ProviderName): ProviderClient {
   if (provider === 'gemini') {
@@ -223,6 +223,6 @@ export function getProviderClient(provider: ProviderName): ProviderClient {
   if (provider === 'mock') {
     return createMockClient();
   }
-  // openrouter وgithub-models: عناصر نائبة غير منفذة في هذه المرحلة.
+  // openrouter and github-models: unimplemented placeholders at this stage.
   throw new ProviderError('PROVIDER_NOT_CONFIGURED', { provider });
 }

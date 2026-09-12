@@ -1,13 +1,13 @@
 /**
- * عقد الاستجابات الموحّد لواجهة الشات.
+ * Unified response contract for the chat interface.
  *
- * ما لا يجب أن يظهر في أي استجابة:
- * - مفاتيح API أو جزء منها.
- * - الـ system prompt أو السياق الموثوق الكامل.
- * - أي stack trace أو تفاصيل داخلية عن اختيار المفاتيح.
+ * What should not appear in any response:
+ * - API keys or part of them.
+ * - The system prompt or the full grounded context.
+ * - Any stack trace or internal details about key selection.
  *
- * "keyStatusUpdates" تحمل فقط معرّفات المفاتيح وحالاتها (بلا قيم)
- * حتى يطبّقها العميل على تخزينه المحلي في مرحلة التطوير.
+ * "keyStatusUpdates" only contains key IDs and their statuses (without values)
+ * so that the client can apply them to its local storage in the development phase.
  */
 
 import type { KeyStatusUpdate } from '@/types/providers';

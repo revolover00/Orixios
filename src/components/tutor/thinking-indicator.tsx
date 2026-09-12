@@ -1,6 +1,6 @@
 /**
- * مؤشر "المدرّس يفكر" أثناء انتظار الرد.
- * بسيط وغير مزعج، ولا يعرض أي تفكير داخلي (reasoning) للمستخدم.
+ * "Tutor is thinking" indicator while waiting for a response.
+ * Simple and unobtrusive, does not display any internal reasoning to the user.
  */
 
 export function ThinkingIndicator() {

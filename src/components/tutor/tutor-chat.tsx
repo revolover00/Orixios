@@ -1,13 +1,13 @@
 /**
- * المنسّق الرئيسي لواجهة شات المدرّس (بث تدريجي).
+ * Main orchestrator for the tutor chat interface (progressive streaming).
  *
- * - لا يبدأ أي طلب إلى المزود مباشرة من المتصفح؛ كل شيء عبر /api/tutor.
- * - المادة ثابتة من الكتالوج (لا ثقة باسم مادة من العميل أو الرابط وحده).
- * - البث: يظهر مؤشر التفكير حتى أول جزء، ثم يتحدّث نص المدرّس تدريجيًا
- *   داخل نفس الفقاعة، وتُعتبر الرسالة مكتملة فقط عند وصول حدث "done".
- * - الإلغاء عبر AbortController آمن: لا يُعتبر خطأ ولا يغيّر حالة المفتاح.
- * - الرسائل الموجودة لا تُفقد عند فشل طلب، ولا تُضاف رسالة المساعد
- *   إلا بعد وصول نص فعلي، ويُمنع الإرسال المزدوج.
+ * - Does not initiate any requests to the provider directly from the browser; everything goes through /api/tutor.
+ * - The subject is fixed from the catalog (no trust in a subject name from the client or URL alone).
+ * - Streaming: a thinking indicator appears until the first part, then the tutor's text gradually updates
+ *   within the same bubble, and the message is considered complete only when a "done" event arrives.
+ * - Cancellation via AbortController is safe: it is not considered an error and does not change the key status.
+ * - Existing messages are not lost if a request fails, and the assistant message is not added
+ *   until actual text arrives, and double sending is prevented.
  */
 
 'use client';
@@ -54,17 +54,17 @@ export function TutorChat({ subject }: TutorChatProps) {
   const [sessionLock, setSessionLock] = useState<SessionLock>(null);
   const sessionIdRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  /** هل أوقف المستخدم البث الحالي بنفسه؟ يميز الإلغاء المتعمد عن الانقطاع. */
+  /** Did the user stop the current stream themselves? Distinguishes intentional cancellation from interruption. */
   const stopRequestedRef = useRef(false);
 
-  // حالة الوصول للمفاتيح حالة خارجية (التخزين المحلي) تُقرأ باشتراك تفاعلي.
+  // Key access status is an external state (local storage) read with an interactive subscription.
   const lockState = useSyncExternalStore(
     subscribeToApiKeysChanges,
     getKeyAccessSnapshot,
     getDefaultKeyAccess,
   );
 
-  // إلغاء أي بث جارٍ عند مغادرة الصفحة — بلا حالة تُحدَّث هنا.
+  // Cancel any ongoing stream when leaving the page — no state is updated here.
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
@@ -80,7 +80,7 @@ export function TutorChat({ subject }: TutorChatProps) {
     [],
   );
 
-  /** إنشاء الجلسة خادميًا عند الحاجة، أو إعادة استخدام الحالية. */
+  /** Create session server-side when needed, or reuse the current one. */
   const resolveSession = useCallback(async (): Promise<string | null> => {
     if (sessionIdRef.current) {
       return sessionIdRef.current;
@@ -103,7 +103,7 @@ export function TutorChat({ subject }: TutorChatProps) {
         return;
       }
 
-      // تُرسَل المفاتيح الصالحة من طبقة التخزين فقط، ولا تُشتق من مدخلات المستخدم.
+      // Valid keys are sent only from the storage layer, and are not derived from user input.
       const payload: TutorChatPayload = {
         sessionId,
         subjectId: subject.id,
@@ -119,8 +119,8 @@ export function TutorChat({ subject }: TutorChatProps) {
       abortRef.current = controller;
       stopRequestedRef.current = false;
 
-      // حالة البث المحلية: تجميع تدريجي مع دفقات عبر requestAnimationFrame
-      // حتى لا يسبب كل جزء إعادة رسم غير ضرورية.
+      // Local streaming state: progressive aggregation with streams via requestAnimationFrame
+      // so that each part does not cause unnecessary re-rendering.
       let streamingMessageId: string | null = null;
       let accumulated = '';
       let flushScheduled = false;
@@ -202,7 +202,7 @@ export function TutorChat({ subject }: TutorChatProps) {
                 applyKeyStatusUpdates(error.keyStatusUpdates);
               }
               if (streamingMessageId) {
-                // نحتفظ بالنص الجزئي ونعلّم الرسالة غير مكتملة.
+                // We keep the partial text and mark the message as incomplete.
                 finalizeStreamingMessage('failed');
               } else {
                 setMessageStatus(userMessageId, 'failed');
@@ -233,19 +233,19 @@ export function TutorChat({ subject }: TutorChatProps) {
         if (!finished) {
           if (streamingMessageId) {
             if (stopRequestedRef.current) {
-              // إيقاف من المستخدم: نحتفظ بالنص الجزئي ونعتبره ردًا منتهيًا
-              // دون إنشاء أي رسالة جديدة أو تعليم خاطئ للحالة.
+              // User stopped: We keep the partial text and consider it a finished response
+              // without creating any new message or marking the status as incorrect.
               finalizeStreamingMessage(undefined);
               setMessageStatus(userMessageId, undefined);
             } else {
-              // انقطاع الاتصال دون حدث اكتمال: الرد غير مكتمل.
+              // Connection interrupted without a completion event: response is incomplete.
               finalizeStreamingMessage('failed');
             }
           } else if (stopRequestedRef.current) {
-            // إيقاف قبل وصول أي نص: لا توجد رسالة مساعد أصلًا.
+            // Stop before any text arrives: no assistant message exists at all.
             setMessageStatus(userMessageId, undefined);
           } else {
-            // انتهى البث دون أي نص أو اكتمال.
+            // Stream ended without any text or completion.
             setMessageStatus(userMessageId, 'failed');
             setChatError({
               code: 'NETWORK_ERROR',
@@ -279,14 +279,14 @@ export function TutorChat({ subject }: TutorChatProps) {
 
   const handleSend = useCallback(
     async (content: string) => {
-      // منع الإرسال المزدوج أو الإرسال في حالة مقفلة.
+      // Prevent double sending or sending in a locked state.
       if (isSending || sessionLock) {
         return;
       }
       setChatError(null);
       setNotice(null);
 
-      // التحقق قبل الإرسال: لا محاولة صامتة بدون مفتاح صالح.
+      // Pre-send check: no silent attempt without a valid key.
       if (getKeyAccessSnapshot() !== 'READY') {
         return;
       }
@@ -306,7 +306,7 @@ export function TutorChat({ subject }: TutorChatProps) {
     [isSending, messages, sendConversation, sessionLock],
   );
 
-  /** إيقاف البث الجاري: يستدعي AbortController مباشرة دون إنشاء رسائل. */
+  /** Stop the current stream: directly calls AbortController without creating messages. */
   const handleStop = useCallback(() => {
     stopRequestedRef.current = true;
     abortRef.current?.abort();
@@ -316,8 +316,8 @@ export function TutorChat({ subject }: TutorChatProps) {
     if (isSending) {
       return;
     }
-    // إعادة المحاولة: نتجاهل أي رد مساعد فاشل حتى لا يتكرر،
-    // ولا نكرر رسالة الطالب الموجودة بالفعل.
+    // Retry: We ignore any failed assistant response so it doesn't repeat,
+    // and we don't duplicate the student's message that already exists.
     const cleanHistory = messages.filter(
       (message) => !(message.role === 'assistant' && message.status === 'failed'),
     );
@@ -432,7 +432,7 @@ export function TutorChat({ subject }: TutorChatProps) {
   );
 }
 
-/** أكواد أخطاء تستهلكها الواجهة للتحقق العام — مرجع للتوثيق والاختبارات. */
+/** Error codes consumed by the interface for general validation — reference for documentation and tests. */
 export const HANDLED_TUTOR_ERROR_CODES: readonly TutorErrorCode[] = [
   'NO_API_KEY',
   'ALL_KEYS_EXHAUSTED',

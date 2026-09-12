@@ -1,6 +1,6 @@
 /**
- * شكل الطلب الموحّد المرسل إلى أي مزود ذكاء اصطناعي.
- * هذا التجريد يفصل طبقة الشات عن تفاصيل أي مزود بعينه.
+ * The unified request format sent to any AI provider.
+ * This abstraction separates the chat layer from the details of any specific provider.
  */
 
 export interface ProviderRequestMessage {
@@ -11,13 +11,13 @@ export interface ProviderRequestMessage {
 export interface ProviderGenerateRequest {
   systemPrompt: string;
   messages: ProviderRequestMessage[];
-  /** مفتاح المستخدم؛ لا يُسجَّل ولا يُعاد في أي استجابة. */
+  /** User's key; not logged and not returned in any response. */
   apiKey: string;
-  /** نموذج اختياري؛ عند الغياب يُستخدم النموذج الافتراضي للمزود. */
+  /** Optional model; if absent, the provider's default model is used. */
   model?: string;
 }
 
-/** طلب البث: نفس طلب التوليد مع إشارة إلغاء اختيارية. */
+/** Streaming request: same as generation request with an optional cancellation signal. */
 export interface ProviderStreamRequest extends ProviderGenerateRequest {
   signal?: AbortSignal;
 }

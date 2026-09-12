@@ -1,13 +1,13 @@
 /**
- * فقاعة رسالة واحدة في الشات (الطالب أو المدرّس).
- * المحتوى يُعرض نصًا فقط دون أي HTML — لا استخدام لـ dangerouslySetInnerHTML.
+ * A single message bubble in the chat (student or tutor).
+ * Content is displayed as plain text without any HTML — no use of dangerouslySetInnerHTML.
  */
 
 import type { UiChatMessage } from '@/types/tutor';
 
 const STATUS_LABELS: Record<NonNullable<UiChatMessage['status']>, string | null> = {
   sending: 'قيد الإرسال...',
-  streaming: null, // البث الجاري لا يحتاج تسمية إضافية.
+  streaming: null, // The ongoing stream does not need an additional label.
   failed: 'لم تُرسل هذه الرسالة',
 };
 

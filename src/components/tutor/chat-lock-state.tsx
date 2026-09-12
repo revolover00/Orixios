@@ -1,8 +1,8 @@
 /**
- * حالات قفل الشات: لا يجري أي إرسال في أي منها.
- * - لا مفاتيح / كل المفاتيح مستنفدة → توجيه إلى صفحة المفاتيح.
- * - جلسة منتهية أو فشل تحميل الجلسة → بدء جلسة جديدة أو إعادة المحاولة.
- * - المادة غير معروفة تُعالج على مستوى الصفحة (404) قبل الوصول إلى هنا.
+ * Chat lock states: no sending is happening in any of them.
+ * - No keys / All keys exhausted → Redirect to keys page.
+ * - Session ended or session loading failed → Start new session or retry.
+ * - Unknown subject is handled at the page level (404) before reaching here.
  */
 
 'use client';
@@ -49,7 +49,7 @@ export interface ChatLockAction {
 
 interface ChatLockStateProps {
   variant: ChatLockVariant;
-  /** إجراء اختياري (مثل بدء جلسة جديدة أو إعادة المحاولة). */
+  /** Optional action (e.g., start new session or retry). */
   action?: ChatLockAction;
 }
 

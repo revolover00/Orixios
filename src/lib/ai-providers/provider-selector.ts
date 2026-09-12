@@ -1,24 +1,24 @@
 /**
- * اختيار المفتاح النشط + دورة الأخطاء والانتقال بين المفاتيح.
+ * Active key selection + error rotation and key switching.
  *
- * الفصل الصارم: الاختيار (getActiveModel) قرار نقي لا يرسل طلبات،
- * والإرسال يتم عبر حقن دالة استدعاء في دورة الانتقال (runWithKeyRotation).
- * لا يعيش أي جزء من هذا المنطق داخل مكوّنات React.
+ * Strict separation: selection (getActiveModel) is a pure decision that sends no requests,
+ * and sending is done by injecting a callback function into the rotation cycle (runWithKeyRotation).
+ * No part of this logic lives inside React components.
  *
- * قواعد الاختيار:
- * 1. لا تُختار مفاتيح بحالة "invalid" أو "exhausted".
- * 2. المفتاح الافتراضي النشط أولًا، وإلا فأول مفتاح نشط.
- * 3. عند تحديد مزود، البحث داخله فقط.
- * 4. لا مفاتيح ← NO_API_KEY؛ ولا يُستخدم مفتاح البيئة إلا باجتماع
- *    DEV_TESTING_MODE=true مع خيار صريح بقبول الـ fallback.
- * 5. مفاتيح موجودة كلها مستنفدة/غير صالحة ← ALL_KEYS_EXHAUSTED.
- * 6. مفاتيح نشطة لمزود غير مفعّل ← PROVIDER_NOT_CONFIGURED.
+ * Selection rules:
+ * 1. Keys with "invalid" or "exhausted" status are not selected.
+ * 2. The active default key first, otherwise the first active key.
+ * 3. When a provider is specified, search only within it.
+ * 4. No keys → NO_API_KEY; environment key is only used if
+ *    DEV_TESTING_MODE=true combined with an explicit option to accept the fallback.
+ * 5. Existing keys are all exhausted/invalid → ALL_KEYS_EXHAUSTED.
+ * 6. Active keys for an inactive provider → PROVIDER_NOT_CONFIGURED.
  *
- * قواعد الانتقال:
- * - QUOTA_EXCEEDED: تعليم المفتاح "exhausted" وتجربة مفتاح نشط آخر،
- *   مرة واحدة فقط لكل مفتاح (عبر Set وحد أعلى للمحاولات) — لا حلقات مفتوحة.
- * - INVALID_API_KEY: تعليم المفتاح "invalid" والتوقف فورًا دون انتقال تلقائي.
- * - NETWORK_ERROR: لا تتغير حالة المفتاح، ويُعاد خطأ مؤقت.
+ * Rotation rules:
+ * - QUOTA_EXCEEDED: mark key as "exhausted" and try another active key,
+ *   only once per key (via Set and a maximum attempt limit) — no infinite loops.
+ * - INVALID_API_KEY: mark key as "invalid" and stop immediately without automatic rotation.
+ * - NETWORK_ERROR: key status does not change, and a temporary error is returned.
  */
 
 import type { ApiKeyStatus, KeyStatusUpdate, UserApiKey } from '@/types/providers';
@@ -36,13 +36,13 @@ import type {
 } from './types';
 import { listApiKeys } from './user-keys-storage';
 
-/** الحد الأعلى لعدد المفاتيح التي تُجرَّب في الطلب الواحد. */
+/** Maximum number of keys to try in a single request. */
 export const MAX_KEY_ATTEMPTS = 5;
 
 /**
- * يحاول استخدام مفتاح البيئة التطويري، ولا ينجح إلا باجتماع:
- * خيار صريح + وضع اختبار مفعّل + مفتاح بيئة غير فارغ + توافق المزود.
- * غير ذلك: لا يوجد أي fallback صامت إطلاقًا.
+ * Attempts to use the development environment key, and only succeeds if:
+ * explicit option + testing mode active + non-empty environment key + provider compatibility.
+ * Otherwise: no silent fallback whatsoever.
  */
 function tryDevEnvironmentFallback(
   options: GetActiveModelOptions | undefined,
@@ -64,14 +64,14 @@ function tryDevEnvironmentFallback(
 }
 
 /**
- * يختار المفتاح النشط الأنسب مع إعداد مزوده.
+ * Selects the most suitable active key with its provider settings.
  *
- * يرمي ProviderError برموز:
- * - NO_API_KEY عندما لا توجد مفاتيح (ولم تتوفر شروط الـ fallback التطويري).
- * - ALL_KEYS_EXHAUSTED عندما توجد مفاتيح لكنها كلها غير صالحة/مستنفدة.
- * - PROVIDER_NOT_CONFIGURED عندما تكون المفاتيح النشطة لمزود غير مفعّل.
+ * Throws ProviderError with codes:
+ * - NO_API_KEY when no keys exist (and development fallback conditions were not met).
+ * - ALL_KEYS_EXHAUSTED when keys exist but all are invalid/exhausted.
+ * - PROVIDER_NOT_CONFIGURED when active keys are for an inactive provider.
  *
- * لا تُغيَّر حالة أي مفتاح داخل هذه الدالة؛ هي قراءة واختيار فقط.
+ * No key status is changed within this function; it is read and selection only.
  */
 export function getActiveModel(options?: GetActiveModelOptions): ProviderSelectionResult {
   const sourceKeys = options?.keys ?? listApiKeys();
@@ -89,7 +89,7 @@ export function getActiveModel(options?: GetActiveModelOptions): ProviderSelecti
 
   const activeKeys = scopedKeys.filter((key) => key.status === 'active');
   if (activeKeys.length === 0) {
-    // توجد مفاتيح لكنها كلها مستنفدة أو غير صالحة.
+    // Keys exist but all are exhausted or invalid.
     throw new ProviderError('ALL_KEYS_EXHAUSTED');
   }
 
@@ -97,7 +97,7 @@ export function getActiveModel(options?: GetActiveModelOptions): ProviderSelecti
     (key) => getProviderConfig(key.provider).enabled === true,
   );
   if (configuredKeys.length === 0) {
-    // مفاتيح نشطة لكن مزودها عنصر نائب غير مفعّل.
+    // Active keys but their provider is an inactive placeholder.
     throw new ProviderError('PROVIDER_NOT_CONFIGURED', {
       provider: activeKeys[0]?.provider,
     });
@@ -108,12 +108,12 @@ export function getActiveModel(options?: GetActiveModelOptions): ProviderSelecti
 }
 
 /**
- * دورة الأخطاء والانتقال بين المفاتيح.
+ * Error rotation and key switching.
  *
- * - تختار وتنفذ، وتجمع تحديثات حالات المفاتيح لإرجاعها للمتصل
- *   (الخادم مثلًا يعيدها للعميل ليطبقها في التخزين).
- * - عدد المحاولات محدود، وSet يمنع تجربة نفس المفتاح مرتين.
- * - الأخطاء المعادة عامة وآمنة؛ لا تُكشف قيم المفاتيح أو النصوص الخام.
+ * - Selects and executes, and collects key status updates to return to the caller
+ *   (e.g., the server returns them to the client to apply in storage).
+ * - The number of attempts is limited, and Set prevents trying the same key twice.
+ * - Returned errors are general and safe; key values or raw texts are not exposed.
  */
 export async function runWithKeyRotation(options: KeyRotationOptions): Promise<KeyRotationOutcome> {
   const { invoke, preferredProvider, onKeyStatusChange } = options;
@@ -144,7 +144,7 @@ export async function runWithKeyRotation(options: KeyRotationOptions): Promise<K
       return { ok: false, error: providerError, keyStatusUpdates };
     }
 
-    // حماية إضافية ضد تكرار تجربة نفس المفتاح (الـ Set + حد المحاولات).
+    // Additional protection against repeatedly trying the same key (Set + attempt limit).
     if (attemptedKeyIds.has(selection.key.id)) {
       return {
         ok: false,
@@ -168,23 +168,23 @@ export async function runWithKeyRotation(options: KeyRotationOptions): Promise<K
       providerError.keyId = selection.key.id;
 
       if (providerError.code === 'QUOTA_EXCEEDED') {
-        // نُعلّم المفتاح مستنفدًا وننتقل مرة واحدة إلى مفتاح نشط آخر.
+        // Mark the key as exhausted and switch once to another active key.
         markKeyStatus(selection.key.id, 'exhausted');
         continue;
       }
 
       if (providerError.code === 'INVALID_API_KEY') {
-        // نُعلّم المفتاح غير صالح ونتوقف فورًا: لا انتقال تلقائيًا.
+        // Mark the key as invalid and stop immediately: no automatic rotation.
         markKeyStatus(selection.key.id, 'invalid');
         return { ok: false, error: providerError, keyStatusUpdates };
       }
 
-      // NETWORK_ERROR أو أي خطأ آخر: لا تغيير لحالة المفتاح، خطأ مؤقت.
+      // NETWORK_ERROR or any other error: no change to key status, temporary error.
       return { ok: false, error: providerError, keyStatusUpdates };
     }
   }
 
-  // استُهلك حد المحاولات (كل المفاتيح المجرّبة استُنفدت).
+  // Attempt limit consumed (all tried keys are exhausted).
   return {
     ok: false,
     error: new ProviderError('ALL_KEYS_EXHAUSTED'),

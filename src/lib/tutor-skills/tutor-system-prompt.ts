@@ -1,20 +1,20 @@
 /**
- * باني System Prompt للمدرّس.
+ * Tutor System Prompt builder.
  *
- * البنية الداخلية بالترتيب الثابت:
- * 1. هوية المدرّس ودوره.
- * 2. قواعد المادة والجلسة (مهارة قفل المادة).
- * 3. قواعد المصدر الموثوق (مهارة المصدر).
- * 4. أسلوب الشرح السقراطي (مهارة الشرح).
- * 5. تنسيق الرد.
- * 6. السياق الموثوق الحالي.
+ * Internal structure in fixed order:
+ * 1. Tutor's identity and role.
+ * 2. Subject and session rules (subject lock skill).
+ * 3. Grounded source rules (source skill).
+ * 4. Socratic explanation style (explanation skill).
+ * 5. Response format.
+ * 6. Current grounded context.
  *
- * القواعد:
- * - يتحقق من السياق قبل البناء، ويرفض السياق الناقص بخطأ واضح.
- * - يعتمد فقط على context الممرر؛ لا يقرأ بيانات خارجية ولا يضيف
- *   معلومات تعليمية من عنده.
- * - لا يتضمن مفاتيح أو بيانات حساسة، ولا يسمح لرسالة الطالب
- *   بإلغاء قواعد المصدر أو قفل المادة.
+ * Rules:
+ * - Validates context before building, and rejects incomplete context with a clear error.
+ * - Relies only on the passed context; does not read external data or add
+ *   educational information of its own.
+ * - Does not include keys or sensitive data, and does not allow the student's message
+ *   to override source rules or subject lock.
  */
 
 import type { TutorPromptContext } from './types';
@@ -26,7 +26,7 @@ import {
 export function buildTutorSystemPrompt(input: TutorPromptContext): string {
   const parts: string[] = [];
 
-  // 1. شخصية الموجّه السقراطي وأسلوب الكتابة
+  // 1. Socratic guide persona and writing style
   parts.push(
     `أنت معلّم وموجّه سقراطي لمادة "${input.subjectName}".\n` +
     `مهمتك هي مساعدة الطالب على الوصول للإجابة بنفسه من خلال خطوات صغيرة وأسئلة توجيهية.\n` +
@@ -36,7 +36,7 @@ export function buildTutorSystemPrompt(input: TutorPromptContext): string {
     `- ممنوع استخدام الإيموجي أو علامات التعجب الزائدة.\n`
   );
 
-  // 2. معالجة المصدر الموثوق
+  // 2. Grounded source processing
   if (input.hasAvailableSource) {
     parts.push(
       `لديك مصدر موثوق ومحدد يجب أن تستمد منه شرحك حصريًا.\n` +
@@ -53,7 +53,7 @@ export function buildTutorSystemPrompt(input: TutorPromptContext): string {
     );
   }
 
-  // 3. الموضوع الحالي (إن وُجد)
+  // 3. Current topic (if any)
   if (input.currentTopic) {
     parts.push(`الموضوع الحالي الذي يدرسه الطالب هو: "${input.currentTopic}". ركز أسئلتك حوله.`);
   }

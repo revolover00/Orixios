@@ -1,5 +1,5 @@
 /**
- * شكل الاستجابة الموحّدة القادمة من أي مزود ذكاء اصطناعي.
+ * The unified response format coming from any AI provider.
  */
 
 export interface ProviderUsage {
@@ -9,15 +9,15 @@ export interface ProviderUsage {
 
 export interface ProviderGenerateResponse {
   text: string;
-  /** التفكير/الاستدلال إن كان المزود يدعمه. */
+  /** Reasoning/inference if the provider supports it. */
   reasoning?: string;
   usage?: ProviderUsage;
 }
 
 /**
- * جزء واحد من بث المزود:
- * - أجزاء نصية تدريجية (text).
- * - جزء ختامي يحمل سبب الانتهاء والاستخدام إن توفرا.
+ * One part of the provider's stream:
+ * - Progressive text parts (text).
+ * - A final part carrying the completion reason and usage if available.
  */
 export interface ProviderStreamChunk {
   text?: string;

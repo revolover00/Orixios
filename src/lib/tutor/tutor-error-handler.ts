@@ -1,11 +1,11 @@
 /**
- * تحويل الأخطاء الداخلية إلى أخطاء آمنة وموحّدة للواجهة.
+ * Converts internal errors into safe and unified errors for the interface.
  *
- * قواعد صارمة:
- * - لا يُعرض النص الخام لأي خطأ، ولا أي stack trace.
- * - لا تُذكر أسماء متغيرات البيئة أو قيمها.
- * - لا تظهر قيم المفاتيح في أي رسالة.
- * - غياب المصدر الموثوق ليس خطأ تقنيًا؛ لا يُنتج خطأ من هنا.
+ * Strict rules:
+ * - The raw text of any error, or any stack trace, is not displayed.
+ * - Environment variable names or their values are not mentioned.
+ * - Key values do not appear in any message.
+ * - Absence of a grounded source is not a technical error; no error is produced from here.
  */
 
 import type { ProviderError } from '@/lib/ai-providers/errors';
@@ -27,7 +27,7 @@ export const TUTOR_ERROR_HTTP_STATUS: Record<TutorErrorCode, number> = {
   INTERNAL_ERROR: 500,
 };
 
-/** هل يمكن للطالب إعادة المحاولة فورًا بنفس المفاتيح؟ */
+/** Can the student retry immediately with the same keys? */
 const RETRYABLE_CODES: ReadonlySet<TutorErrorCode> = new Set<TutorErrorCode>([
   'NETWORK_ERROR',
 ]);
@@ -57,7 +57,7 @@ export function safeTutorError(
   };
 }
 
-/** ترجمة أخطاء المزودات إلى أخطاء الشات الآمنة. */
+/** Translates provider errors into safe chat errors. */
 export function providerErrorToTutorError(error: ProviderError): TutorErrorBody {
   switch (error.code) {
     case 'NO_API_KEY':
@@ -74,7 +74,7 @@ export function providerErrorToTutorError(error: ProviderError): TutorErrorBody 
   }
 }
 
-/** ترجمة أخطاء الجلسات إلى أخطاء الشات الآمنة. */
+/** Translates session errors into safe chat errors. */
 export function sessionErrorToTutorError(
   error: SessionError,
   sessionSubjectName?: string,
@@ -98,12 +98,12 @@ export function sessionErrorToTutorError(
   }
 }
 
-/** خطأ عام لأي استثناء غير متوقع — رسالة عامة بلا أي تفاصيل، وحالة 500. */
+/** General error for any unexpected exception — a general message without any details, and status 500. */
 export function unknownErrorToTutorError(): TutorErrorBody {
   return safeTutorError('INTERNAL_ERROR');
 }
 
-/** حالة HTTP المناسبة لأي استجابة. */
+/** Appropriate HTTP status for any response. */
 export function httpStatusForResponse(response: TutorApiResponse): number {
   if (response.success) {
     return 200;

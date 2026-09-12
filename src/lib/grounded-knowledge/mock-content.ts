@@ -1,11 +1,11 @@
 /**
- * محتوى موثوق تجريبي (Mock) مرتبط بالمواد.
+ * Mock experimental grounded content related to subjects.
  *
- * تنبيه مهم: كل ما هنا محتوى مؤلَّف لأغراض التطوير والاختبار فقط،
- * وليس تسجيلات حقيقية لمدرسين ولا كتبًا أو امتحانات فعلية.
- * لذلك:
- * - مصدر كل عنصر هو "mock" ومرجعه "development-fixture".
- * - لاحقًا يُستبدل بمصادر حقيقية مخزنة في Supabase.
+ * Important note: All content here is fabricated for development and testing purposes only,
+ * and is not real recordings of teachers, nor actual books or exams.
+ * Therefore:
+ * - The source of each item is "mock" and its reference is "development-fixture".
+ * - Later, it will be replaced with real sources stored in Supabase.
  */
 
 import type { GroundedContent } from '@/types/grounded-content';

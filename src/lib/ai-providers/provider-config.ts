@@ -1,29 +1,29 @@
 /**
- * سجل المزودات وإعداداتها.
+ * Provider registry and settings.
  *
- * الحالة الحالية:
- * - Gemini فقط هو المزود المفعّل فعليًا.
- * - OpenRouter وGitHub Models عناصر نائبة غير مفعّلة (لا تنفيذ فعليًا بعد).
- * - "mock" أداة محاكاة تطويرية محلية (ليس مزود ذكاء اصطناعي خارجيًا)،
- *   تسمح بتجربة الشات دون مفاتيح حقيقية، ويمكن تعطيلها بعلامة واحدة.
- * - لا يوجد NVIDIA عمدًا.
+ * Current status:
+ * - Only Gemini is actually active.
+ * - OpenRouter and GitHub Models are inactive placeholders (no actual implementation yet).
+ * - "mock" is a local development simulation tool (not an external AI provider),
+ *   allowing chat testing without real keys, and can be disabled with a single flag.
+ * - NVIDIA is intentionally excluded.
  *
- * قاعدة أساسية: وجود متغير بيئي لا يجعل المزود متاحًا للطلاب تلقائيًا.
- * المفتاح البيئي الوحيد المقروء هو مفتاح تطوير محلي، وبشروط صارمة أدناه.
+ * Basic rule: the presence of an environment variable does not automatically make a provider available to students.
+ * The only environment key read is a local development key, and under strict conditions below.
  *
- * ملاحظة: إنشاء عملاء المزودات نفسه انتقل إلى "provider-client.ts".
+ * Note: The creation of provider clients itself has moved to "provider-client.ts".
  */
 
 import type { ProviderName, UserApiKey } from '@/types/providers';
 import type { ProviderConfig } from './types';
 
-/** مدخل سجل المزودات: إعداد قياسي + بيانات عرض وتشغيل. */
+/** Provider registry entry: standard configuration + display and operational data. */
 export interface ProviderRegistryEntry extends ProviderConfig {
   description: string;
   defaultModel?: string;
-  /** أداة محاكاة تطويرية محلية وليست خدمة خارجية. */
+  /** Local development simulation tool, not an external service. */
   isSimulation: boolean;
-  /** عنصر نائب غير منفّذ بعد. */
+  /** Placeholder, not yet implemented. */
   isPlaceholder: boolean;
 }
 
@@ -84,12 +84,12 @@ export function listEnabledProviders(): ProviderRegistryEntry[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* وضع الاختبار التطويري (معزول ومحمي بشرطين معًا)                     */
+/* Development testing mode (isolated and protected by two conditions together)                     */
 /* ------------------------------------------------------------------ */
 
 /**
- * هل وضع الاختبار التطويري مفعّل؟
- * القراءة الوحيدة المسموحة لمتغير البيئة الخاص بالوضع.
+ * Is development testing mode active?
+ * The only allowed reading of the mode's environment variable.
  */
 export function isDevTestingMode(): boolean {
   return process.env.DEV_TESTING_MODE === 'true';
@@ -98,16 +98,16 @@ export function isDevTestingMode(): boolean {
 export const DEV_FALLBACK_KEY_ID = 'dev-fallback-gemini-key';
 
 /**
- * مفتاح fallback للتطوير المحلي فقط.
+ * Fallback key for local development only.
  *
- * الحماية المطبقة:
- * 1. يُقرأ فقط عندما يكون DEV_TESTING_MODE=true (الافتراضي: غير مفعّل).
- * 2. لا يستخدمه مسار الطالب تلقائيًا أبدًا؛ استخدامه يتطلب خيارًا صريحًا
- *    (allowDevEnvironmentFallback=true) يُمرر إلى دالة الاختيار.
- * 3. قيمته لا تُطبع في السجلات ولا تُضمَّن في أي رسالة خطأ.
+ * Applied protections:
+ * 1. Read only when DEV_TESTING_MODE=true (default: inactive).
+ * 2. The student path never uses it automatically; its use requires an explicit option
+ *    (allowDevEnvironmentFallback=true) passed to the selection function.
+ * 3. Its value is not printed in logs and not included in any error message.
  *
- * المتغير المقروء هو "GEMINI_API_KEY" بصفته مفتاح تطوير محلي فقط،
- * وليس بديلًا عن مفاتيح المستخدمين في أي مسار إنتاجي.
+ * The variable read is "GEMINI_API_KEY" as a local development key only,
+ * and not a substitute for user keys in any production path.
  */
 export function getDevTestingFallbackKey(): UserApiKey | null {
   if (!isDevTestingMode()) {

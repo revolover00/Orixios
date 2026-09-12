@@ -1,6 +1,6 @@
 /**
- * أخطاء نطاق الجلسات.
- * الرسائل عامة وواضحة، ولا تكشف أي تفاصيل داخلية حساسة.
+ * Session domain errors.
+ * Messages are general and clear, and do not reveal any sensitive internal details.
  */
 
 import type { SessionErrorCode } from '@/types/sessions';

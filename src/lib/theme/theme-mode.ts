@@ -1,9 +1,9 @@
 /**
- * نظام الثيمات: داكن (افتراضي) / فاتح / حسب النظام.
+ * Theme system: Dark (default) / Light / System.
  *
- * - الاختيار يُحفظ محليًا في المتصفح.
- * - سكربت مضمّن في الـ <head> يطبّق الوضع قبل أول رسم لمنع الوميض.
- * - كل الدوال آمنة أثناء التصيير الخادمي (لا أخطاء "window is not defined").
+ * - Selection is saved locally in the browser.
+ * - An inline script in the <head> applies the mode before the first render to prevent flicker.
+ * - All functions are safe during server-side rendering (no "window is not defined" errors).
  */
 
 export type ThemeMode = 'dark' | 'light' | 'system';
@@ -57,7 +57,7 @@ export function setThemeMode(mode: ThemeMode): void {
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, mode);
   } catch {
-    // فشل التخزين لا يجب أن يمنع التبديل البصري.
+    // Storage failure should not prevent visual switching.
   }
   applyTheme(mode);
   if (typeof window.dispatchEvent === 'function') {
@@ -66,8 +66,8 @@ export function setThemeMode(mode: ThemeMode): void {
 }
 
 /**
- * اشتراك في تغييرات الثيم (تبديل محلي، تبويب آخر، أو تغيّر تفضيل النظام
- * أثناء وضع "النظام"). مصمم للعمل مع useSyncExternalStore.
+ * Subscribe to theme changes (local switch, another tab, or system preference change
+ * during "System" mode). Designed to work with useSyncExternalStore.
  */
 export function subscribeToThemeChanges(listener: () => void): () => void {
   if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {

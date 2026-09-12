@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 };
 
 /**
- * سكربت يطبّق الثيم المحفوظ قبل أول رسم لمنع وميض الثيم الخطأ.
- * الافتراضي عند غياب الاختيار: الوضع الداكن.
+ * Script applies the saved theme before the first render to prevent a flash of incorrect theme.
+ * Default when no choice is present: dark mode.
  */
 const themeInitScript = `(function(){try{var s=localStorage.getItem('${THEME_STORAGE_KEY}');var m=(s==='light'||s==='system')?s:'dark';var d=(m==='dark')||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){document.documentElement.classList.add('dark');}})();`;
 

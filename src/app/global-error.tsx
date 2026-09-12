@@ -1,5 +1,5 @@
 'use client';
-
+export const dynamic = 'force-dynamic';
 export default function GlobalError({
   error,
   reset,
@@ -8,17 +8,9 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html>
       <body>
-        <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-          <h2 className="mb-4 text-2xl font-bold">حدث خطأ غير متوقع في النظام!</h2>
-          <button
-            onClick={() => reset()}
-            className="rounded bg-primary px-4 py-2 text-primary-foreground"
-          >
-            إعادة المحاولة
-          </button>
-        </div>
+        <h2>Error</h2>
       </body>
     </html>
   );

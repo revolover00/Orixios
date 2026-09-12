@@ -1,11 +1,11 @@
 /**
- * طلب الشات بعد التحقق منه عبر Zod.
+ * Chat request after Zod validation.
  *
- * قواعد الثقة:
- * - لا يُؤخذ أي "system prompt" أو "subjectName" من العميل؛
- *   الرسائل المسموحة "user" و"assistant" فقط.
- * - معرّفات الرسائل المرسلة من العميل تُهمل (لا تُثق ولا تُستخدم).
- * - اسم المادة يأتي من الجلسة والكتالوج في طبقة الخدمة.
+ * Trust rules:
+ * - No "system prompt" or "subjectName" is taken from the client;
+ *   only "user" and "assistant" messages are allowed.
+ * - Message IDs sent from the client are ignored (not trusted or used).
+ * - The subject name comes from the session and catalog in the service layer.
  */
 
 import type { UserKeyCredential } from '@/types/providers';
@@ -19,14 +19,14 @@ export interface TutorRequest {
   messages: ChatMessage[];
   currentTopic?: string;
   /**
-   * مفاتيح المستخدم الصالحة (مرتبة: الافتراضي أولًا).
-   * ضروري في مرحلة تخزين المفاتيح في المتصفح، وسيُستبدل لاحقًا
-   * بجلب آمن عبر Supabase من جهة الخادم.
+   * Valid user keys (sorted: default first).
+   * Necessary in the phase of storing keys in the browser, and will later be replaced
+   * by secure fetching via Supabase from the server side.
    */
   keys: UserKeyCredential[];
 }
 
-/** تحويل الجسم المتحقق منه إلى طلب الخدمة، مع إسقاط ما لا يُوثق به. */
+/** Converts the validated body into a service request, dropping untrusted parts. */
 export function toTutorRequest(validated: TutorChatRequestInput): TutorRequest {
   return {
     sessionId: validated.sessionId,

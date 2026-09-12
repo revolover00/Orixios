@@ -8,9 +8,9 @@ interface SessionPageProps {
 }
 
 /**
- * صفحة جلسة المادة. المادة جزء ثابت من الرابط: /session/[subjectId]
- * ولا يمكن تغييرها داخل الجلسة نفسها.
- * يُتحقق من قيمة الرابط عبر Zod ثم عبر كتالوج المواد النشطة.
+ * Subject session page. The subject is a fixed part of the URL: /session/[subjectId]
+ * and cannot be changed within the session itself.
+ * The URL value is validated via Zod and then against the active subject catalog.
  */
 export default async function SessionPage({ params }: SessionPageProps) {
   const { subjectId: rawSubjectId } = await params;

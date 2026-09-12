@@ -1,0 +1,2438 @@
+{
+  "src/components/layout/app-shell.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * The general structure of the application: sidebar + main content area."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * - Desktop: The sidebar is fixed."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Phone: Transforms into a Drawer that opens with the menu button."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Does not display data that does not actually exist (session history is empty until the feature is implemented)."
+    },
+    {
+      "lineIndex": 142,
+      "text": "      {/* Sidebar — Desktop */}"
+    },
+    {
+      "lineIndex": 147,
+      "text": "      {/* Sidebar — Phone (Drawer) */}"
+    },
+    {
+      "lineIndex": 165,
+      "text": "        {/* Small top bar — Phone only */}"
+    }
+  ],
+  "src/components/settings/api-key-card.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Single key card: Name, Provider, Status, Date, Default,"
+    },
+    {
+      "lineIndex": 2,
+      "text": " * and only a masked preview (full value is never displayed after saving)."
+    }
+  ],
+  "src/components/settings/api-key-form.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Form for adding a new key."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Validation via Zod (provider required, non-empty label, non-empty key)."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Prevent saving a key for an inactive provider, and prevent duplicate keys with a message"
+    },
+    {
+      "lineIndex": 5,
+      "text": " *   that does not reveal the value."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - The full key is not displayed after saving, and the field is cleared immediately upon success."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - The key is not sent to any external service from this page."
+    },
+    {
+      "lineIndex": 56,
+      "text": "    // The first key automatically becomes default within the storage layer,"
+    },
+    {
+      "lineIndex": 57,
+      "text": "    // and the explicit option enforces default when needed."
+    },
+    {
+      "lineIndex": 62,
+      "text": "    // Clear the field from visual memory immediately upon successful save."
+    }
+  ],
+  "src/components/settings/api-key-list.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * List of key cards with a \"no keys\" state."
+    }
+  ],
+  "src/components/settings/delete-api-key-dialog.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Dialog to confirm key deletion."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * Displays only the label and masked preview, never the key value."
+    }
+  ],
+  "src/components/settings/provider-selector.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * AI provider selection in the key addition form."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * - Gemini is active."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - OpenRouter and GitHub Models are placeholders that appear as \"currently unavailable\""
+    },
+    {
+      "lineIndex": 4,
+      "text": " *   and saving is prevented for them."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - The local development simulator tool is a separate development option (not an external service)."
+    }
+  ],
+  "src/components/theme/theme-toggle.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Theme toggle button: Dark → Light → System → Dark."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * - Saves the selection locally."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Does not cause hydration mismatch (server snapshot is stable)."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Works with keyboard (real button) and has a clear label."
+    }
+  ],
+  "src/components/tutor/chat-input.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Message input field with an internal send button."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * - Enter to send, Shift+Enter for a new line."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Does not send empty messages or only spaces."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Input is disabled during sending to prevent duplication."
+    },
+    {
+      "lineIndex": 14,
+      "text": "  /** Is a stream currently active? The stop button appears instead of the send button during it. */"
+    },
+    {
+      "lineIndex": 16,
+      "text": "  /** Stop the current stream via AbortController. */"
+    }
+  ],
+  "src/components/tutor/chat-lock-state.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Chat lock states: no sending is happening in any of them."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * - No keys / All keys exhausted → Redirect to keys page."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Session ended or session loading failed → Start new session or retry."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Unknown subject is handled at the page level (404) before reaching here."
+    },
+    {
+      "lineIndex": 51,
+      "text": "  /** Optional action (e.g., start new session or retry). */"
+    }
+  ],
+  "src/components/tutor/message-bubble.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * A single message bubble in the chat (student or tutor)."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * Content is displayed as plain text without any HTML — no use of dangerouslySetInnerHTML."
+    },
+    {
+      "lineIndex": 9,
+      "text": "  streaming: null, // The ongoing stream does not need an additional label."
+    }
+  ],
+  "src/components/tutor/message-list.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Chat message list in chronological order, with empty state and smart scrolling."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * - Clearly distinguishes between student and tutor messages in RTL direction."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - During streaming: automatic scrolling only if the user is near the end,"
+    },
+    {
+      "lineIndex": 4,
+      "text": " *   so as not to force them down while reading an old message."
+    },
+    {
+      "lineIndex": 20,
+      "text": "/** The distance from the bottom at which the user is considered \"near the end\". */"
+    }
+  ],
+  "src/components/tutor/thinking-indicator.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * \"Tutor is thinking\" indicator while waiting for a response."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * Simple and unobtrusive, does not display any internal reasoning to the user."
+    }
+  ],
+  "src/components/tutor/tutor-chat.tsx": [
+    {
+      "lineIndex": 1,
+      "text": " * Main orchestrator for the tutor chat interface (progressive streaming)."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Does not initiate any requests to the provider directly from the browser; everything goes through /api/tutor."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - The subject is fixed from the catalog (no trust in a subject name from the client or URL alone)."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - Streaming: a thinking indicator appears until the first part, then the tutor's text gradually updates"
+    },
+    {
+      "lineIndex": 6,
+      "text": " *   within the same bubble, and the message is considered complete only when a \"done\" event arrives."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - Cancellation via AbortController is safe: it is not considered an error and does not change the key status."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * - Existing messages are not lost if a request fails, and the assistant message is not added"
+    },
+    {
+      "lineIndex": 9,
+      "text": " *   until actual text arrives, and double sending is prevented."
+    },
+    {
+      "lineIndex": 56,
+      "text": "  /** Did the user stop the current stream themselves? Distinguishes intentional cancellation from interruption. */"
+    },
+    {
+      "lineIndex": 59,
+      "text": "  // Key access status is an external state (local storage) read with an interactive subscription."
+    },
+    {
+      "lineIndex": 66,
+      "text": "  // Cancel any ongoing stream when leaving the page — no state is updated here."
+    },
+    {
+      "lineIndex": 82,
+      "text": "  /** Create session server-side when needed, or reuse the current one. */"
+    },
+    {
+      "lineIndex": 105,
+      "text": "      // Valid keys are sent only from the storage layer, and are not derived from user input."
+    },
+    {
+      "lineIndex": 121,
+      "text": "      // Local streaming state: progressive aggregation with streams via requestAnimationFrame"
+    },
+    {
+      "lineIndex": 122,
+      "text": "      // so that each part does not cause unnecessary re-rendering."
+    },
+    {
+      "lineIndex": 204,
+      "text": "                // We keep the partial text and mark the message as incomplete."
+    },
+    {
+      "lineIndex": 235,
+      "text": "              // User stopped: We keep the partial text and consider it a finished response"
+    },
+    {
+      "lineIndex": 236,
+      "text": "              // without creating any new message or marking the status as incorrect."
+    },
+    {
+      "lineIndex": 240,
+      "text": "              // Connection interrupted without a completion event: response is incomplete."
+    },
+    {
+      "lineIndex": 244,
+      "text": "            // Stop before any text arrives: no assistant message exists at all."
+    },
+    {
+      "lineIndex": 247,
+      "text": "            // Stream ended without any text or completion."
+    },
+    {
+      "lineIndex": 281,
+      "text": "      // Prevent double sending or sending in a locked state."
+    },
+    {
+      "lineIndex": 288,
+      "text": "      // Pre-send check: no silent attempt without a valid key."
+    },
+    {
+      "lineIndex": 308,
+      "text": "  /** Stop the current stream: directly calls AbortController without creating messages. */"
+    },
+    {
+      "lineIndex": 318,
+      "text": "    // Retry: We ignore any failed assistant response so it doesn't repeat,"
+    },
+    {
+      "lineIndex": 319,
+      "text": "    // and we don't duplicate the student's message that already exists."
+    },
+    {
+      "lineIndex": 434,
+      "text": "/** Error codes consumed by the interface for general validation — reference for documentation and tests. */"
+    }
+  ],
+  "src/lib/ai-providers/errors.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * AI provider errors and their classification."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Strict rules:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Displayed messages are general and safe only; raw error text or any key is not leaked"
+    },
+    {
+      "lineIndex": 5,
+      "text": " *   to the interface. Raw details are stored in 'cause' for internal server-side use."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - Errors or keys are not printed to the console in any path."
+    },
+    {
+      "lineIndex": 24,
+      "text": "/** Safe general messages for display — do not include any raw details. */"
+    },
+    {
+      "lineIndex": 38,
+      "text": "  /** Safe general message only. Do not pass raw texts or secrets. */"
+    },
+    {
+      "lineIndex": 63,
+      "text": " * Is the error caused by the user canceling the request?"
+    },
+    {
+      "lineIndex": 64,
+      "text": " * Cancellation is not always an error, does not change the key status, and is not classified as a network error."
+    },
+    {
+      "lineIndex": 98,
+      "text": " * Classifies any error coming from a provider (or from AI SDK) into a ProviderError with a specific code."
+    },
+    {
+      "lineIndex": 100,
+      "text": " * - 401/403 or Unauthorized → INVALID_API_KEY (not retryable)"
+    },
+    {
+      "lineIndex": 101,
+      "text": " * - 429 or quotas/rate limits → QUOTA_EXCEEDED (retryable with another key)"
+    },
+    {
+      "lineIndex": 102,
+      "text": " * - Network failures → NETWORK_ERROR (temporary, without changing key status)"
+    },
+    {
+      "lineIndex": 103,
+      "text": " * - Otherwise → PROVIDER_NOT_CONFIGURED with a general message"
+    },
+    {
+      "lineIndex": 105,
+      "text": " * The resulting message is always general; the raw error remains in 'cause' internally only."
+    }
+  ],
+  "src/lib/ai-providers/provider-client.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Unified provider clients."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - No React component should make direct calls to a provider; all calls pass through here."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Currently implemented: actual Gemini, and a local development simulation provider."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - OpenRouter and GitHub Models are placeholders that reject execution with a clear error."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - The design allows for adding Streaming later (adding a new function to the interface"
+    },
+    {
+      "lineIndex": 7,
+      "text": " *   without breaking the current generateResponse)."
+    },
+    {
+      "lineIndex": 20,
+      "text": " * Unified provider client:"
+    },
+    {
+      "lineIndex": 21,
+      "text": " * - \"generateResponse\" for full generation — mandatory for every provider."
+    },
+    {
+      "lineIndex": 22,
+      "text": " * - \"streamResponse\" for progressive streaming — optional; providers that don't support it use the service layer's"
+    },
+    {
+      "lineIndex": 23,
+      "text": " *   full generation path as a safe fallback."
+    },
+    {
+      "lineIndex": 37,
+      "text": "      // The provider is created explicitly with the user's key, and does not rely on any environment variable."
+    },
+    {
+      "lineIndex": 47,
+      "text": "      // Inference comes in parts; we combine only the text parts."
+    },
+    {
+      "lineIndex": 63,
+      "text": "      // The provider is created explicitly with the user's key, and does not rely on any environment variable."
+    },
+    {
+      "lineIndex": 67,
+      "text": "      // The cancellation signal is passed directly so that model consumption stops when the client cancels."
+    },
+    {
+      "lineIndex": 96,
+      "text": "/* ------------------------- Development Simulation Provider ------------------------ */"
+    },
+    {
+      "lineIndex": 98,
+      "text": "/** Reads source topics from the system prompt (between wrapping tags). */"
+    },
+    {
+      "lineIndex": 142,
+      "text": " * Local simulation: builds a Socratic tutor response based on the topics embedded"
+    },
+    {
+      "lineIndex": 143,
+      "text": " * in the system prompt only, without any external connection."
+    },
+    {
+      "lineIndex": 145,
+      "text": "/** Builds the simulation provider's response based on the topics embedded in the prompt only. */"
+    },
+    {
+      "lineIndex": 186,
+      "text": "      await sleep(450); // Simulate response time"
+    },
+    {
+      "lineIndex": 193,
+      "text": "      // Splitting preserves spaces so that the text arrives intact when assembled."
+    },
+    {
+      "lineIndex": 212,
+      "text": "/* ------------------------------ Selection --------------------------------- */"
+    },
+    {
+      "lineIndex": 215,
+      "text": " * Returns the appropriate provider client. Inactive placeholders"
+    },
+    {
+      "lineIndex": 216,
+      "text": " * immediately reject execution with a clear error instead of any silent behavior."
+    },
+    {
+      "lineIndex": 225,
+      "text": "  // openrouter and github-models: unimplemented placeholders at this stage."
+    }
+  ],
+  "src/lib/ai-providers/provider-config.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Provider registry and settings."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Current status:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Only Gemini is actually active."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - OpenRouter and GitHub Models are inactive placeholders (no actual implementation yet)."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - \"mock\" is a local development simulation tool (not an external AI provider),"
+    },
+    {
+      "lineIndex": 7,
+      "text": " *   allowing chat testing without real keys, and can be disabled with a single flag."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * - NVIDIA is intentionally excluded."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * Basic rule: the presence of an environment variable does not automatically make a provider available to students."
+    },
+    {
+      "lineIndex": 11,
+      "text": " * The only environment key read is a local development key, and under strict conditions below."
+    },
+    {
+      "lineIndex": 13,
+      "text": " * Note: The creation of provider clients itself has moved to \"provider-client.ts\"."
+    },
+    {
+      "lineIndex": 19,
+      "text": "/** Provider registry entry: standard configuration + display and operational data. */"
+    },
+    {
+      "lineIndex": 23,
+      "text": "  /** Local development simulation tool, not an external service. */"
+    },
+    {
+      "lineIndex": 25,
+      "text": "  /** Placeholder, not yet implemented. */"
+    },
+    {
+      "lineIndex": 86,
+      "text": "/* Development testing mode (isolated and protected by two conditions together)                     */"
+    },
+    {
+      "lineIndex": 90,
+      "text": " * Is development testing mode active?"
+    },
+    {
+      "lineIndex": 91,
+      "text": " * The only allowed reading of the mode's environment variable."
+    },
+    {
+      "lineIndex": 100,
+      "text": " * Fallback key for local development only."
+    },
+    {
+      "lineIndex": 102,
+      "text": " * Applied protections:"
+    },
+    {
+      "lineIndex": 103,
+      "text": " * 1. Read only when DEV_TESTING_MODE=true (default: inactive)."
+    },
+    {
+      "lineIndex": 104,
+      "text": " * 2. The student path never uses it automatically; its use requires an explicit option"
+    },
+    {
+      "lineIndex": 105,
+      "text": " *    (allowDevEnvironmentFallback=true) passed to the selection function."
+    },
+    {
+      "lineIndex": 106,
+      "text": " * 3. Its value is not printed in logs and not included in any error message."
+    },
+    {
+      "lineIndex": 108,
+      "text": " * The variable read is \"GEMINI_API_KEY\" as a local development key only,"
+    },
+    {
+      "lineIndex": 109,
+      "text": " * and not a substitute for user keys in any production path."
+    }
+  ],
+  "src/lib/ai-providers/provider-request.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * The unified request format sent to any AI provider."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * This abstraction separates the chat layer from the details of any specific provider."
+    },
+    {
+      "lineIndex": 13,
+      "text": "  /** User's key; not logged and not returned in any response. */"
+    },
+    {
+      "lineIndex": 15,
+      "text": "  /** Optional model; if absent, the provider's default model is used. */"
+    },
+    {
+      "lineIndex": 19,
+      "text": "/** Streaming request: same as generation request with an optional cancellation signal. */"
+    }
+  ],
+  "src/lib/ai-providers/provider-response.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * The unified response format coming from any AI provider."
+    },
+    {
+      "lineIndex": 11,
+      "text": "  /** Reasoning/inference if the provider supports it. */"
+    },
+    {
+      "lineIndex": 17,
+      "text": " * One part of the provider's stream:"
+    },
+    {
+      "lineIndex": 18,
+      "text": " * - Progressive text parts (text)."
+    },
+    {
+      "lineIndex": 19,
+      "text": " * - A final part carrying the completion reason and usage if available."
+    }
+  ],
+  "src/lib/ai-providers/provider-selector.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Active key selection + error rotation and key switching."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Strict separation: selection (getActiveModel) is a pure decision that sends no requests,"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * and sending is done by injecting a callback function into the rotation cycle (runWithKeyRotation)."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * No part of this logic lives inside React components."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * Selection rules:"
+    },
+    {
+      "lineIndex": 8,
+      "text": " * 1. Keys with \"invalid\" or \"exhausted\" status are not selected."
+    },
+    {
+      "lineIndex": 9,
+      "text": " * 2. The active default key first, otherwise the first active key."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * 3. When a provider is specified, search only within it."
+    },
+    {
+      "lineIndex": 11,
+      "text": " * 4. No keys → NO_API_KEY; environment key is only used if"
+    },
+    {
+      "lineIndex": 12,
+      "text": " *    DEV_TESTING_MODE=true combined with an explicit option to accept the fallback."
+    },
+    {
+      "lineIndex": 13,
+      "text": " * 5. Existing keys are all exhausted/invalid → ALL_KEYS_EXHAUSTED."
+    },
+    {
+      "lineIndex": 14,
+      "text": " * 6. Active keys for an inactive provider → PROVIDER_NOT_CONFIGURED."
+    },
+    {
+      "lineIndex": 16,
+      "text": " * Rotation rules:"
+    },
+    {
+      "lineIndex": 17,
+      "text": " * - QUOTA_EXCEEDED: mark key as \"exhausted\" and try another active key,"
+    },
+    {
+      "lineIndex": 18,
+      "text": " *   only once per key (via Set and a maximum attempt limit) — no infinite loops."
+    },
+    {
+      "lineIndex": 19,
+      "text": " * - INVALID_API_KEY: mark key as \"invalid\" and stop immediately without automatic rotation."
+    },
+    {
+      "lineIndex": 20,
+      "text": " * - NETWORK_ERROR: key status does not change, and a temporary error is returned."
+    },
+    {
+      "lineIndex": 38,
+      "text": "/** Maximum number of keys to try in a single request. */"
+    },
+    {
+      "lineIndex": 42,
+      "text": " * Attempts to use the development environment key, and only succeeds if:"
+    },
+    {
+      "lineIndex": 43,
+      "text": " * explicit option + testing mode active + non-empty environment key + provider compatibility."
+    },
+    {
+      "lineIndex": 44,
+      "text": " * Otherwise: no silent fallback whatsoever."
+    },
+    {
+      "lineIndex": 66,
+      "text": " * Selects the most suitable active key with its provider settings."
+    },
+    {
+      "lineIndex": 68,
+      "text": " * Throws ProviderError with codes:"
+    },
+    {
+      "lineIndex": 69,
+      "text": " * - NO_API_KEY when no keys exist (and development fallback conditions were not met)."
+    },
+    {
+      "lineIndex": 70,
+      "text": " * - ALL_KEYS_EXHAUSTED when keys exist but all are invalid/exhausted."
+    },
+    {
+      "lineIndex": 71,
+      "text": " * - PROVIDER_NOT_CONFIGURED when active keys are for an inactive provider."
+    },
+    {
+      "lineIndex": 73,
+      "text": " * No key status is changed within this function; it is read and selection only."
+    },
+    {
+      "lineIndex": 91,
+      "text": "    // Keys exist but all are exhausted or invalid."
+    },
+    {
+      "lineIndex": 99,
+      "text": "    // Active keys but their provider is an inactive placeholder."
+    },
+    {
+      "lineIndex": 110,
+      "text": " * Error rotation and key switching."
+    },
+    {
+      "lineIndex": 112,
+      "text": " * - Selects and executes, and collects key status updates to return to the caller"
+    },
+    {
+      "lineIndex": 113,
+      "text": " *   (e.g., the server returns them to the client to apply in storage)."
+    },
+    {
+      "lineIndex": 114,
+      "text": " * - The number of attempts is limited, and Set prevents trying the same key twice."
+    },
+    {
+      "lineIndex": 115,
+      "text": " * - Returned errors are general and safe; key values or raw texts are not exposed."
+    },
+    {
+      "lineIndex": 146,
+      "text": "    // Additional protection against repeatedly trying the same key (Set + attempt limit)."
+    },
+    {
+      "lineIndex": 170,
+      "text": "        // Mark the key as exhausted and switch once to another active key."
+    },
+    {
+      "lineIndex": 176,
+      "text": "        // Mark the key as invalid and stop immediately: no automatic rotation."
+    },
+    {
+      "lineIndex": 181,
+      "text": "      // NETWORK_ERROR or any other error: no change to key status, temporary error."
+    },
+    {
+      "lineIndex": 186,
+      "text": "  // Attempt limit consumed (all tried keys are exhausted)."
+    }
+  ],
+  "src/lib/ai-providers/types.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * AI provider layer types (BYOK)."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Domain types are defined in \"@/types/providers\" and re-exported here"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * so that this layer is self-contained for those who import it."
+    },
+    {
+      "lineIndex": 26,
+      "text": "/** Provider configuration as it appears for logs and selection. */"
+    },
+    {
+      "lineIndex": 34,
+      "text": "/** Successful selection result: the selected key + its provider configuration. */"
+    },
+    {
+      "lineIndex": 40,
+      "text": "/** Options for active key selection. */"
+    },
+    {
+      "lineIndex": 42,
+      "text": "  /** Search only within a specific provider. */"
+    },
+    {
+      "lineIndex": 45,
+      "text": "   * Explicit option allowing the use of the development environment key when user keys are absent."
+    },
+    {
+      "lineIndex": 46,
+      "text": "   * Never honored unless two conditions are met: this option = true and DEV_TESTING_MODE=true."
+    },
+    {
+      "lineIndex": 50,
+      "text": "   * Inject keys directly (for testing, or for server requests where keys arrive"
+    },
+    {
+      "lineIndex": 51,
+      "text": "   * in the request body). If absent, they are read from user storage."
+    },
+    {
+      "lineIndex": 56,
+      "text": "/** Options for error rotation and key switching. */"
+    },
+    {
+      "lineIndex": 59,
+      "text": "  /** Actual execution is separated from selection logic (does not mix selection with sending). */"
+    },
+    {
+      "lineIndex": 62,
+      "text": "  /** Maximum number of keys to try in a single request. */"
+    },
+    {
+      "lineIndex": 65,
+      "text": "   * Optional hook to apply state changes immediately (e.g., local storage in the client)."
+    },
+    {
+      "lineIndex": 66,
+      "text": "   * State updates are always collected in the rotation result as well."
+    }
+  ],
+  "src/lib/ai-providers/user-keys-storage.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * User key storage (React-independent abstraction layer)."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * ⚠️ Important security warning:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Storing in localStorage is a temporary solution for local development only, and is not considered secure"
+    },
+    {
+      "lineIndex": 5,
+      "text": " *   for production ever (any script on the page can read the keys)."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - Production keys must be stored with strong encryption via Backend/Supabase Vault,"
+    },
+    {
+      "lineIndex": 7,
+      "text": " *   while maintaining the same signatures for this layer so that callers do not change."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * - Keys or their values are not printed to the console in any path of this module."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * Implemented protections:"
+    },
+    {
+      "lineIndex": 11,
+      "text": " * - Operating on the server where localStorage does not exist (safely returning empty lists)."
+    },
+    {
+      "lineIndex": 12,
+      "text": " * - Corrupt JSON inside localStorage (safe disregard)."
+    },
+    {
+      "lineIndex": 13,
+      "text": " * - Old data that does not match the current type (sanitize each entry before accepting it)."
+    },
+    {
+      "lineIndex": 14,
+      "text": " * - Presence of more than one default key (only one default is applied: the first one)."
+    },
+    {
+      "lineIndex": 15,
+      "text": " * - Key without a valid provider or without an apiKey (completely excluded)."
+    },
+    {
+      "lineIndex": 17,
+      "text": " * Snapshots are referentially stable to work with useSyncExternalStore"
+    },
+    {
+      "lineIndex": 18,
+      "text": " * without re-rendering loops."
+    },
+    {
+      "lineIndex": 33,
+      "text": "/** Event broadcast on any change so that interfaces immediately update the lock status. */"
+    },
+    {
+      "lineIndex": 55,
+      "text": "    // In some modes (e.g., privacy), accessing storage throws an exception."
+    },
+    {
+      "lineIndex": 62,
+      "text": "/* ------------------------- Stored Data Sanitization ------------------------- */"
+    },
+    {
+      "lineIndex": 65,
+      "text": " * Enforces only one default: the first key with isDefault remains default,"
+    },
+    {
+      "lineIndex": 66,
+      "text": " * and the rest are reset. Handles old or manually edited data."
+    },
+    {
+      "lineIndex": 83,
+      "text": " * Sanitize a value read from storage:"
+    },
+    {
+      "lineIndex": 84,
+      "text": " * Excludes any entry that is not an object, or lacks a valid id/provider/apiKey,"
+    },
+    {
+      "lineIndex": 85,
+      "text": " * corrects optional fields, then enforces a single default."
+    },
+    {
+      "lineIndex": 103,
+      "text": "    // A key without a known provider, or without an apiKey, or without an id is completely excluded."
+    },
+    {
+      "lineIndex": 135,
+      "text": "/* ---------------------- Stable Snapshot Cache ----------------------- */"
+    },
+    {
+      "lineIndex": 141,
+      "text": " * \"Memory-only\" mode: activated when the last write failed, so reads are served"
+    },
+    {
+      "lineIndex": 142,
+      "text": " * from the cache (the user's last intention) until a subsequent write succeeds."
+    },
+    {
+      "lineIndex": 146,
+      "text": "/** Updates the cache only if the raw value in storage has changed. */"
+    },
+    {
+      "lineIndex": 149,
+      "text": "    // Previous write failed: We keep the cache state as the source of truth"
+    },
+    {
+      "lineIndex": 150,
+      "text": "    // instead of reading an old value from storage and showing keys disappearing."
+    },
+    {
+      "lineIndex": 157,
+      "text": "    // Storage access failed: We return the last valid snapshot without breaking the application,"
+    },
+    {
+      "lineIndex": 158,
+      "text": "    // and no key values are included in any error path."
+    },
+    {
+      "lineIndex": 168,
+      "text": "        // Corrupt JSON: We safely ignore it as if storage were empty."
+    },
+    {
+      "lineIndex": 203,
+      "text": "    // Write failed (e.g., storage full): We keep the state in the cache"
+    },
+    {
+      "lineIndex": 204,
+      "text": "    // so the interface doesn't break, safely ignoring the error (no key values in any log)."
+    },
+    {
+      "lineIndex": 212,
+      "text": "/* ------------------------------ Reading ---------------------------------- */"
+    },
+    {
+      "lineIndex": 218,
+      "text": "/** Active keys only (regardless of provider). */"
+    },
+    {
+      "lineIndex": 223,
+      "text": "/** The default key if it exists (after sanitization, there is at most one default). */"
+    },
+    {
+      "lineIndex": 228,
+      "text": "/** Active keys sorted by priority: default first, then by creation date. */"
+    },
+    {
+      "lineIndex": 250,
+      "text": "/* --------------------------- Subscription and Snapshots --------------------------- */"
+    },
+    {
+      "lineIndex": 253,
+      "text": " * Subscribe to key changes (local change + other tabs),"
+    },
+    {
+      "lineIndex": 254,
+      "text": " * designed to work directly with useSyncExternalStore."
+    },
+    {
+      "lineIndex": 261,
+      "text": "    cachedRaw = null; // Invalidate cache then notify listener"
+    },
+    {
+      "lineIndex": 272,
+      "text": "/** General keys snapshot (referentially stable) for display in the interface. */"
+    },
+    {
+      "lineIndex": 281,
+      "text": "/** Server snapshot: a fixed empty list. */"
+    },
+    {
+      "lineIndex": 286,
+      "text": "/** Access status snapshot (primitive text, inherently stable). */"
+    },
+    {
+      "lineIndex": 291,
+      "text": "/** Server snapshot for access status. */"
+    },
+    {
+      "lineIndex": 296,
+      "text": "/* ------------------------------- Writing --------------------------------- */"
+    },
+    {
+      "lineIndex": 314,
+      "text": " * Safely delete a key:"
+    },
+    {
+      "lineIndex": 315,
+      "text": " * - Deleting a normal key does not break the interface."
+    },
+    {
+      "lineIndex": 316,
+      "text": " * - If the deleted key was the default, the oldest active key (or oldest key"
+    },
+    {
+      "lineIndex": 317,
+      "text": " *   overall) is promoted to be the new default, instead of leaving the system without an intended default."
+    },
+    {
+      "lineIndex": 340,
+      "text": "/** Sets the default key while resetting any other defaults. */"
+    },
+    {
+      "lineIndex": 349,
+      "text": "/** Renames an existing key; returns false if unsuccessful. */"
+    },
+    {
+      "lineIndex": 364,
+      "text": " * Detects duplicate key values for a specific provider before saving."
+    },
+    {
+      "lineIndex": 365,
+      "text": " * The resulting message about duplication in the interface never reveals the value itself."
+    },
+    {
+      "lineIndex": 375,
+      "text": "/** Applies state updates coming from the server (e.g., marking a key as exhausted). */"
+    },
+    {
+      "lineIndex": 389,
+      "text": "/* ------------------------------ Safe Display ------------------------------ */"
+    },
+    {
+      "lineIndex": 392,
+      "text": " * Masks the key for display in the interface."
+    },
+    {
+      "lineIndex": 393,
+      "text": " * Example: \"AIza••••••••••1234\" — only the first 4 and last 4 characters."
+    },
+    {
+      "lineIndex": 394,
+      "text": " * Short keys (8 characters or less) are fully masked so they cannot be inferred."
+    },
+    {
+      "lineIndex": 404,
+      "text": "/** Safe version for the interface: never contains the raw key value. */"
+    }
+  ],
+  "src/lib/grounded-knowledge/knowledge-errors.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Grounded knowledge layer errors + standard message for out-of-source."
+    },
+    {
+      "lineIndex": 32,
+      "text": " * The only standard message used when the snippet is outside the available source."
+    },
+    {
+      "lineIndex": 33,
+      "text": " * Defined here only once and not repeated in other files."
+    }
+  ],
+  "src/lib/grounded-knowledge/knowledge-loader.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Loading grounded content and building its context."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Strict rules:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Content from a different subject is never loaded."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - Inactive content is not returned."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - When content is absent: empty array and \"hasAvailableSource = false\","
+    },
+    {
+      "lineIndex": 7,
+      "text": " *   without generating alternatives, using a similar subject, or inventing context."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * - No sources outside Mock Data are used at this stage."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * Extension point: when Supabase is added, the data source will be replaced within this"
+    },
+    {
+      "lineIndex": 11,
+      "text": " * module only, while maintaining the same signatures."
+    },
+    {
+      "lineIndex": 20,
+      "text": "/** Display labels for source types within the context. */"
+    },
+    {
+      "lineIndex": 47,
+      "text": " * Loads active content for a single subject only."
+    },
+    {
+      "lineIndex": 48,
+      "text": " * Throws KnowledgeError(UNKNOWN_SUBJECT) for an unknown subject,"
+    },
+    {
+      "lineIndex": 49,
+      "text": " * and returns an empty array for a known subject with no content."
+    },
+    {
+      "lineIndex": 59,
+      "text": " * Loads content for a specific topic within a subject."
+    },
+    {
+      "lineIndex": 60,
+      "text": " * Without a topic: all subject content. If topic is absent: empty array"
+    },
+    {
+      "lineIndex": 61,
+      "text": " * (we don't mix other topics or suggest similar subjects)."
+    },
+    {
+      "lineIndex": 82,
+      "text": " * Builds the complete grounded context result."
+    },
+    {
+      "lineIndex": 83,
+      "text": " * When sources are absent: \"hasAvailableSource = false\" and completely empty context,"
+    },
+    {
+      "lineIndex": 84,
+      "text": " * and no alternative content is generated."
+    },
+    {
+      "lineIndex": 132,
+      "text": " * Builds the grounded context text ready to be passed to the system prompt later."
+    },
+    {
+      "lineIndex": 133,
+      "text": " * Returns an empty string when no suitable source exists."
+    }
+  ],
+  "src/lib/grounded-knowledge/mock-content.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Mock experimental grounded content related to subjects."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Important note: All content here is fabricated for development and testing purposes only,"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * and is not real recordings of teachers, nor actual books or exams."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * Therefore:"
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - The source of each item is \"mock\" and its reference is \"development-fixture\"."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - Later, it will be replaced with real sources stored in Supabase."
+    }
+  ],
+  "src/lib/grounded-knowledge/types.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Grounded knowledge types + wrapping tags within the prompt."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * Basic types are defined in \"@/types/grounded-content\"."
+    },
+    {
+      "lineIndex": 11,
+      "text": "/** Tags used to wrap sources within the system prompt and enable the simulation provider to read them. */"
+    }
+  ],
+  "src/lib/sessions/session-errors.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Session domain errors."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * Messages are general and clear, and do not reveal any sensitive internal details."
+    }
+  ],
+  "src/lib/sessions/session-store.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Temporary session store (Mock)."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Design:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - Storage (SessionStorage) is completely separated from session logic (SessionStore),"
+    },
+    {
+      "lineIndex": 5,
+      "text": " *   making a later transition to Supabase possible without changing the layer interface."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - No real database is used at this stage."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - Session subject is fixed at creation and can never be modified."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * - Ended sessions cannot be used."
+    },
+    {
+      "lineIndex": 20,
+      "text": "   * Optional explicit ID: necessary when the caller has a fixed session ID"
+    },
+    {
+      "lineIndex": 21,
+      "text": "   * (e.g., chat session linked to the URL). Otherwise, a UUID is automatically generated."
+    },
+    {
+      "lineIndex": 46,
+      "text": " * Temporary local student ID: at this stage, no authentication yet,"
+    },
+    {
+      "lineIndex": 47,
+      "text": " * and later it will be replaced with a Supabase user ID without changing the layer interface."
+    },
+    {
+      "lineIndex": 51,
+      "text": "/** In-memory storage for development purposes only. */"
+    },
+    {
+      "lineIndex": 72,
+      "text": "    // A session is not created for a non-existent or inactive subject."
+    },
+    {
+      "lineIndex": 83,
+      "text": "    // Prevent creating a session over an already existing ID."
+    },
+    {
+      "lineIndex": 119,
+      "text": "   * Enforce subject lock on the session:"
+    },
+    {
+      "lineIndex": 120,
+      "text": "   * - Non-existent session → SESSION_NOT_FOUND."
+    },
+    {
+      "lineIndex": 121,
+      "text": "   * - Ended session → SESSION_ENDED."
+    },
+    {
+      "lineIndex": 122,
+      "text": "   * - Different subject → SUBJECT_MISMATCH without any modification to the session."
+    },
+    {
+      "lineIndex": 174,
+      "text": "/** Single server-side instance for temporary application. */"
+    }
+  ],
+  "src/lib/sessions/subject-catalog.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Temporary subject catalog."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * This file is the only place where subject names and their alternatives are defined"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * (to facilitate their modification or addition of new subjects). Subject logic is not placed within"
+    },
+    {
+      "lineIndex": 5,
+      "text": " * React components, and the catalog does not rely on any user data."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * Later, this catalog can be replaced with a Supabase table while maintaining"
+    },
+    {
+      "lineIndex": 8,
+      "text": " * the same functions."
+    },
+    {
+      "lineIndex": 53,
+      "text": " * Common and alternative names for each subject, used in matching the typed name."
+    },
+    {
+      "lineIndex": 54,
+      "text": " * Edited here only, in the same catalog file."
+    },
+    {
+      "lineIndex": 63,
+      "text": "/** All active subjects only. */"
+    },
+    {
+      "lineIndex": 69,
+      "text": " * Search for a subject by ID."
+    },
+    {
+      "lineIndex": 70,
+      "text": " * Does not return a non-existent subject, nor an inactive subject."
+    },
+    {
+      "lineIndex": 79,
+      "text": "/** Type guard for valid and active subject IDs only. */"
+    },
+    {
+      "lineIndex": 84,
+      "text": "/** Alternative names for a specific subject (for use in matching). */"
+    }
+  ],
+  "src/lib/sessions/subject-matcher.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Matching the typed subject name with catalog subjects."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * The algorithm is intentionally simple and can be replaced later (with fuzzy matching or"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * automated classification) while maintaining the same signature:"
+    },
+    {
+      "lineIndex": 5,
+      "text": " * 1. Normalize text: trim spaces, unify Latin characters, and simple Arabic normalization."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * 2. Exact match with name/alternative/ID → \"exact\"."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * 3. Partial match (start of name or start of alternative) → \"suggestions\" only,"
+    },
+    {
+      "lineIndex": 8,
+      "text": " *    without automatic selection if the match is weak."
+    },
+    {
+      "lineIndex": 19,
+      "text": "/** Minimum text length to be considered valid for partial matching. */"
+    },
+    {
+      "lineIndex": 32,
+      "text": "/** Collects all accepted names for a subject: ID, standard name, Arabic name, and alternatives. */"
+    },
+    {
+      "lineIndex": 49,
+      "text": " * Matches a typed subject name with the catalog."
+    },
+    {
+      "lineIndex": 50,
+      "text": " * Does not automatically select a subject if there is no clear match."
+    },
+    {
+      "lineIndex": 58,
+      "text": "  // 1) Exact match."
+    },
+    {
+      "lineIndex": 69,
+      "text": "  // 2) Partial match: suggestions only without automatic resolution."
+    },
+    {
+      "lineIndex": 77,
+      "text": "/* ------------------------- Old Compatible Interface ------------------------- */"
+    },
+    {
+      "lineIndex": 86,
+      "text": " * Compatible with old calls: returns only exact matches,"
+    },
+    {
+      "lineIndex": 87,
+      "text": " * and is internally built on top of matchSubjectName."
+    }
+  ],
+  "src/lib/sessions/subjects.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Compatibility interface with old imports."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * The only source for subject data is now \"subject-catalog.ts\"."
+    }
+  ],
+  "src/lib/sessions/types.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Session layer types: storage interface separated from session logic."
+    },
+    {
+      "lineIndex": 9,
+      "text": " * Session storage adapter."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * Current implementation is in-memory; when Supabase is added later, another implementation"
+    },
+    {
+      "lineIndex": 11,
+      "text": " * will be provided for the same interface without any change in session logic or consumers."
+    }
+  ],
+  "src/lib/theme/theme-mode.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Theme system: Dark (default) / Light / System."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * - Selection is saved locally in the browser."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - An inline script in the <head> applies the mode before the first render to prevent flicker."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - All functions are safe during server-side rendering (no \"window is not defined\" errors)."
+    },
+    {
+      "lineIndex": 59,
+      "text": "    // Storage failure should not prevent visual switching."
+    },
+    {
+      "lineIndex": 68,
+      "text": " * Subscribe to theme changes (local switch, another tab, or system preference change"
+    },
+    {
+      "lineIndex": 69,
+      "text": " * during \"System\" mode). Designed to work with useSyncExternalStore."
+    }
+  ],
+  "src/lib/tutor/tutor-client.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Client layer for connecting to the chat interface and session interfaces."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Rules:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - All request logic is here, not within display components."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - The shape of any response is validated before being used in the interface."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - Keys or sensitive responses are not displayed or logged anywhere."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - \"system\", \"developer\", or \"tool\" messages are never sent from the interface;"
+    },
+    {
+      "lineIndex": 8,
+      "text": " *   the only two possible message roles from the browser are \"user\" and \"assistant\"."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * Note on the \"keys\" field: Valid keys are collected from the storage layer"
+    },
+    {
+      "lineIndex": 11,
+      "text": " * (current development phase) and are not derived from user input for each message,"
+    },
+    {
+      "lineIndex": 12,
+      "text": " * and will later transition to secure fetching via Supabase from the server side."
+    },
+    {
+      "lineIndex": 34,
+      "text": "/** Invalid transfer/response error — does not reveal internal details. */"
+    },
+    {
+      "lineIndex": 60,
+      "text": "/** Strict validation of key status updates before passing them to the storage layer. */"
+    },
+    {
+      "lineIndex": 85,
+      "text": " * Strict validation of the /api/tutor response shape before using it."
+    },
+    {
+      "lineIndex": 86,
+      "text": " * Returns \"null\" for any unexpected shape so that untrusted data is not consumed."
+    },
+    {
+      "lineIndex": 125,
+      "text": "      // Unknown codes are passed as is and handled by the interface via a safe general path."
+    },
+    {
+      "lineIndex": 160,
+      "text": "/* ------------------------------- Streaming Path -------------------------------- */"
+    },
+    {
+      "lineIndex": 163,
+      "text": "  /** New text part from the tutor's response. */"
+    },
+    {
+      "lineIndex": 165,
+      "text": "  /** Stream completed successfully. */"
+    },
+    {
+      "lineIndex": 167,
+      "text": "  /** Unified error (before or during streaming). */"
+    },
+    {
+      "lineIndex": 188,
+      "text": " * Sends a streaming chat request and reads its events."
+    },
+    {
+      "lineIndex": 190,
+      "text": " * - \"response.json()\" is not used for the streaming path; reading is via SSE only."
+    },
+    {
+      "lineIndex": 191,
+      "text": " * - Unified errors before streaming starts arrive as normal JSON and are passed to \"onError\"."
+    },
+    {
+      "lineIndex": 192,
+      "text": " * - Cancellation via AbortController is not considered an error and does not invoke any handler."
+    },
+    {
+      "lineIndex": 193,
+      "text": " * - The shape of each event is validated before consumption, and unknown ones are safely ignored."
+    },
+    {
+      "lineIndex": 217,
+      "text": "    // Unified error before streaming starts (normal JSON response)."
+    },
+    {
+      "lineIndex": 242,
+      "text": "  // Progressive decoding that preserves Arabic and UTF-8 even when characters are split across chunks."
+    },
+    {
+      "lineIndex": 285,
+      "text": "      // Lock is already released."
+    },
+    {
+      "lineIndex": 290,
+      "text": "/** Creates a new session for a subject, with response shape validation. */"
+    }
+  ],
+  "src/lib/tutor/tutor-error-handler.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Converts internal errors into safe and unified errors for the interface."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Strict rules:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - The raw text of any error, or any stack trace, is not displayed."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - Environment variable names or their values are not mentioned."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - Key values do not appear in any message."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - Absence of a grounded source is not a technical error; no error is produced from here."
+    },
+    {
+      "lineIndex": 29,
+      "text": "/** Can the student retry immediately with the same keys? */"
+    },
+    {
+      "lineIndex": 59,
+      "text": "/** Translates provider errors into safe chat errors. */"
+    },
+    {
+      "lineIndex": 76,
+      "text": "/** Translates session errors into safe chat errors. */"
+    },
+    {
+      "lineIndex": 100,
+      "text": "/** General error for any unexpected exception — a general message without any details, and status 500. */"
+    },
+    {
+      "lineIndex": 105,
+      "text": "/** Appropriate HTTP status for any response. */"
+    }
+  ],
+  "src/lib/tutor/tutor-request.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Chat request after Zod validation."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Trust rules:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - No \"system prompt\" or \"subjectName\" is taken from the client;"
+    },
+    {
+      "lineIndex": 5,
+      "text": " *   only \"user\" and \"assistant\" messages are allowed."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - Message IDs sent from the client are ignored (not trusted or used)."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - The subject name comes from the session and catalog in the service layer."
+    },
+    {
+      "lineIndex": 21,
+      "text": "   * Valid user keys (sorted: default first)."
+    },
+    {
+      "lineIndex": 22,
+      "text": "   * Necessary in the phase of storing keys in the browser, and will later be replaced"
+    },
+    {
+      "lineIndex": 23,
+      "text": "   * by secure fetching via Supabase from the server side."
+    },
+    {
+      "lineIndex": 28,
+      "text": "/** Converts the validated body into a service request, dropping untrusted parts. */"
+    }
+  ],
+  "src/lib/tutor/tutor-response.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Unified response contract for the chat interface."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * What should not appear in any response:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - API keys or part of them."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - The system prompt or the full grounded context."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - Any stack trace or internal details about key selection."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * \"keyStatusUpdates\" only contains key IDs and their statuses (without values)"
+    },
+    {
+      "lineIndex": 9,
+      "text": " * so that the client can apply them to its local storage in the development phase."
+    }
+  ],
+  "src/lib/tutor/tutor-service.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Chat service: core business logic, separated from the HTTP layer."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Full (non-streaming) path: \"processTutorRequest\"."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * Streaming path: \"startTutorStream\" — performs all validation before starting the stream,"
+    },
+    {
+      "lineIndex": 5,
+      "text": " * then returns events (token / done / error) via the unified streaming protocol."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * Shared processing order:"
+    },
+    {
+      "lineIndex": 8,
+      "text": " * 1. Session validation."
+    },
+    {
+      "lineIndex": 9,
+      "text": " * 2. Subject match validation (subject lock)."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * 3. Load subject from catalog."
+    },
+    {
+      "lineIndex": 11,
+      "text": " * 4. Load grounded context."
+    },
+    {
+      "lineIndex": 12,
+      "text": " * 5. Build system prompt."
+    },
+    {
+      "lineIndex": 13,
+      "text": " * 6. Key and provider selection."
+    },
+    {
+      "lineIndex": 14,
+      "text": " * 7. Send messages (full or streaming)."
+    },
+    {
+      "lineIndex": 15,
+      "text": " * 8. Error classification."
+    },
+    {
+      "lineIndex": 16,
+      "text": " * 9. Update key status when needed."
+    },
+    {
+      "lineIndex": 17,
+      "text": " * 10. Return a safe response."
+    },
+    {
+      "lineIndex": 56,
+      "text": "/** Injectable dependencies for testing without any external calls. */"
+    },
+    {
+      "lineIndex": 59,
+      "text": "  /** Session store can be replaced in testing or when migrating to Supabase. */"
+    },
+    {
+      "lineIndex": 61,
+      "text": "  /** Request cancellation signal (passed to the provider). */"
+    },
+    {
+      "lineIndex": 65,
+      "text": "/* ------------------------- Prepared Shared Context ------------------------ */"
+    },
+    {
+      "lineIndex": 76,
+      "text": " * All validation that must precede any provider call (whether full or streaming):"
+    },
+    {
+      "lineIndex": 77,
+      "text": " * Session, subject lock, catalog, grounded context, and prompt building."
+    },
+    {
+      "lineIndex": 128,
+      "text": "/** The client sends valid keys sorted by priority; the first is the default. */"
+    },
+    {
+      "lineIndex": 139,
+      "text": "/** Active keys order: default first, then by creation date. */"
+    },
+    {
+      "lineIndex": 151,
+      "text": "/* ----------------------------- Full Path ------------------------------ */"
+    },
+    {
+      "lineIndex": 178,
+      "text": "  // Limited loop: one attempt per key, no infinite loops."
+    },
+    {
+      "lineIndex": 207,
+      "text": "        // User cancellation is not always an error and does not change key status."
+    },
+    {
+      "lineIndex": 230,
+      "text": "/* ------------------------------- Streaming Path -------------------------------- */"
+    },
+    {
+      "lineIndex": 233,
+      "text": "  /** Known failure before streaming starts: returned as a unified normal JSON response. */"
+    },
+    {
+      "lineIndex": 235,
+      "text": "  /** Setup successful: streaming events are ready (token then done, or error during streaming). */"
+    },
+    {
+      "lineIndex": 246,
+      "text": " * Start streaming the tutor's response."
+    },
+    {
+      "lineIndex": 248,
+      "text": " * All validation, key selection, and first part attempt happen before returning events;"
+    },
+    {
+      "lineIndex": 249,
+      "text": " * therefore, errors like \"invalid key\" or \"no keys\" are returned as a pre-streaming failure,"
+    },
+    {
+      "lineIndex": 250,
+      "text": " * while errors occurring after text arrives are delivered as an \"error\" event within the stream."
+    },
+    {
+      "lineIndex": 304,
+      "text": "        // Non-streaming fallback: provider does not support streaming; wrap the full response as a single event."
+    },
+    {
+      "lineIndex": 320,
+      "text": "      // Test the key with the first part before committing to streaming."
+    },
+    {
+      "lineIndex": 331,
+      "text": "        // User cancellation before streaming: not always an error and no change to key status."
+    },
+    {
+      "lineIndex": 341,
+      "text": "        continue; // Try another active key once."
+    },
+    {
+      "lineIndex": 394,
+      "text": "        // Client cancellation: close silently without error or changing key status."
+    },
+    {
+      "lineIndex": 419,
+      "text": "        // Closing the secondary resource is not an error worth escalating."
+    }
+  ],
+  "src/lib/tutor/tutor-stream.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Chat streaming protocol (SSE)."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Fixed event format between server and client:"
+    },
+    {
+      "lineIndex": 14,
+      "text": " * Rules:"
+    },
+    {
+      "lineIndex": 15,
+      "text": " * - Keys, system prompt, or grounded context are not sent in any event."
+    },
+    {
+      "lineIndex": 16,
+      "text": " * - Unknown or invalid events are safely ignored by the client."
+    },
+    {
+      "lineIndex": 43,
+      "text": "/** Encodes a single event into an SSE block. */"
+    },
+    {
+      "lineIndex": 69,
+      "text": "/** Strict validation of key status updates before consumption. */"
+    },
+    {
+      "lineIndex": 108,
+      "text": " * Parses a single SSE block into a validated event."
+    },
+    {
+      "lineIndex": 109,
+      "text": " * Returns \"null\" for any unknown event or invalid data (safely ignored)."
+    },
+    {
+      "lineIndex": 163,
+      "text": "  // Unknown event: safely ignored."
+    }
+  ],
+  "src/lib/tutor-skills/explanation-skill.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Explanation skill: the tutor's persona and Socratic teaching method,"
+    },
+    {
+      "lineIndex": 2,
+      "text": " * and rules for handling different conversation states."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * The skill does not add any educational content; content comes only from the grounded context."
+    }
+  ],
+  "src/lib/tutor-skills/grounded-source-skill.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Grounded source skill: enforces reliance on grounded context only,"
+    },
+    {
+      "lineIndex": 2,
+      "text": " * and prevents invention, reliance on general knowledge, or revealing internal structure."
+    },
+    {
+      "lineIndex": 4,
+      "text": " * The skill does not add any educational content of its own; the context itself comes"
+    },
+    {
+      "lineIndex": 5,
+      "text": " * from the grounded knowledge layer via context."
+    }
+  ],
+  "src/lib/tutor-skills/session-subject-lock-skill.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Session subject lock skill: instructions that enforce subject immutability,"
+    },
+    {
+      "lineIndex": 2,
+      "text": " * and reject changing it via question phrasing or text instructions."
+    },
+    {
+      "lineIndex": 7,
+      "text": "/** The message used when attempting to change the subject only, not in every response. */"
+    },
+    {
+      "lineIndex": 12,
+      "text": "/** The standard message returned by the API when attempting to change the subject. */"
+    }
+  ],
+  "src/lib/tutor-skills/skill-composer.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Skill composer: integrates independent skills into a single instruction block."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Rules:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * - The integration order is fixed, non-random, and testable (order array below)."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * - No duplication of the same skill (first appearance wins), so instructions are not repeated unnecessarily."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - The composer passes the same context to all skills: it cannot choose another subject"
+    },
+    {
+      "lineIndex": 7,
+      "text": " *   or pass grounded context for a different subject."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * - Adding a new skill = passing it in the array without modifying the rest of the system."
+    },
+    {
+      "lineIndex": 16,
+      "text": "/** The fixed, adopted order for core skills. */"
+    },
+    {
+      "lineIndex": 23,
+      "text": "/** Core skills in their fixed order. */"
+    },
+    {
+      "lineIndex": 29,
+      "text": " * Integrates skill instructions according to the passed array order."
+    },
+    {
+      "lineIndex": 30,
+      "text": " * If no skills are passed, default core skills are used."
+    },
+    {
+      "lineIndex": 41,
+      "text": "      continue; // No duplication of the same skill"
+    }
+  ],
+  "src/lib/tutor-skills/tutor-system-prompt.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Tutor System Prompt builder."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Internal structure in fixed order:"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * 1. Tutor's identity and role."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * 2. Subject and session rules (subject lock skill)."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * 3. Grounded source rules (source skill)."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * 4. Socratic explanation style (explanation skill)."
+    },
+    {
+      "lineIndex": 8,
+      "text": " * 5. Response format."
+    },
+    {
+      "lineIndex": 9,
+      "text": " * 6. Current grounded context."
+    },
+    {
+      "lineIndex": 11,
+      "text": " * Rules:"
+    },
+    {
+      "lineIndex": 12,
+      "text": " * - Validates context before building, and rejects incomplete context with a clear error."
+    },
+    {
+      "lineIndex": 13,
+      "text": " * - Relies only on the passed context; does not read external data or add"
+    },
+    {
+      "lineIndex": 14,
+      "text": " *   educational information of its own."
+    },
+    {
+      "lineIndex": 15,
+      "text": " * - Does not include keys or sensitive data, and does not allow the student's message"
+    },
+    {
+      "lineIndex": 16,
+      "text": " *   to override source rules or subject lock."
+    },
+    {
+      "lineIndex": 28,
+      "text": "  // 1. Socratic guide persona and writing style"
+    },
+    {
+      "lineIndex": 38,
+      "text": "  // 2. Grounded source processing"
+    },
+    {
+      "lineIndex": 55,
+      "text": "  // 3. Current topic (if any)"
+    }
+  ],
+  "src/lib/tutor-skills/types.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Tutor skills layer types."
+    },
+    {
+      "lineIndex": 3,
+      "text": " * Design: no single large system prompt; each skill is an independent unit"
+    },
+    {
+      "lineIndex": 4,
+      "text": " * composed according to the conversation state via the skill composer."
+    },
+    {
+      "lineIndex": 7,
+      "text": "/** Names of integrated core skills. */"
+    },
+    {
+      "lineIndex": 15,
+      "text": " * Union of core names, with the \"(string & {})\" part allowing the addition of"
+    },
+    {
+      "lineIndex": 16,
+      "text": " * new custom skills later without modifying the entire system, while retaining autocompletion"
+    },
+    {
+      "lineIndex": 17,
+      "text": " * for core names."
+    },
+    {
+      "lineIndex": 21,
+      "text": "/** Instruction building context: everything skills need, and nothing outside. */"
+    },
+    {
+      "lineIndex": 26,
+      "text": "  /** Ready grounded context text (empty when no source is available). */"
+    },
+    {
+      "lineIndex": 32,
+      "text": "/** Independent, composable tutor skill. */"
+    }
+  ],
+  "src/lib/validation/session-schemas.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Zod schemas for session and subject domains."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * Rejects: empty values, spaces only, and unknown values."
+    },
+    {
+      "lineIndex": 12,
+      "text": "/** Student ID: non-empty and after trimming spaces. */"
+    },
+    {
+      "lineIndex": 19,
+      "text": "/** Subject ID: trimmed spaces and from the known list only. */"
+    },
+    {
+      "lineIndex": 25,
+      "text": "/** Session ID. */"
+    },
+    {
+      "lineIndex": 33,
+      "text": " * Validates the subject ID coming from the URL segment /session/[subjectId]."
+    },
+    {
+      "lineIndex": 34,
+      "text": " * URL segments do not inherently contain extra spaces, but we apply the same strictness."
+    },
+    {
+      "lineIndex": 41,
+      "text": "/** Session creation body. */"
+    },
+    {
+      "lineIndex": 49,
+      "text": "/** Read session ID from a request. */"
+    }
+  ],
+  "src/lib/validation/tutor-schemas.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Zod schemas for input validation."
+    },
+    {
+      "lineIndex": 10,
+      "text": " * A single message from the client."
+    },
+    {
+      "lineIndex": 11,
+      "text": " * - Allowed roles: user and assistant only; any other role"
+    },
+    {
+      "lineIndex": 12,
+      "text": " *   (like system, tool, or developer) is immediately rejected."
+    },
+    {
+      "lineIndex": 13,
+      "text": " * - Message ID is optional and ignored server-side (not trusted)."
+    },
+    {
+      "lineIndex": 36,
+      "text": "/** Schema for POST /api/tutor request body */"
+    },
+    {
+      "lineIndex": 52,
+      "text": "  /** Optional: \"true\" returns a streaming response (SSE), its absence maintains normal behavior. */"
+    },
+    {
+      "lineIndex": 58,
+      "text": "/** Schema for adding a key form in the settings page (client-side validation). */"
+    },
+    {
+      "lineIndex": 76,
+      "text": " * Schema for adding a key form in the settings page, preventing saving a key for an inactive provider"
+    },
+    {
+      "lineIndex": 77,
+      "text": " * (placeholders like OpenRouter and GitHub Models)."
+    },
+    {
+      "lineIndex": 92,
+      "text": "/** Schema for selecting an existing key (valid ID check). */"
+    },
+    {
+      "lineIndex": 99,
+      "text": "/** Provider selection schema. */"
+    },
+    {
+      "lineIndex": 110,
+      "text": "/** Summarizes Zod error messages into a short, displayable text. */"
+    }
+  ],
+  "src/types/grounded-content.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Grounded Content types."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * All tutor explanations must be based exclusively on these sources,"
+    },
+    {
+      "lineIndex": 3,
+      "text": " * and it should never be claimed that experimental content is a real recording or book."
+    },
+    {
+      "lineIndex": 19,
+      "text": "  /** The axis or lesson covered by the source. */"
+    },
+    {
+      "lineIndex": 23,
+      "text": "  /** Source reference; in development, it is \"development-fixture\". */"
+    },
+    {
+      "lineIndex": 25,
+      "text": "  /** Inactive content is never loaded. */"
+    },
+    {
+      "lineIndex": 29,
+      "text": "/** Result of building grounded context for a specific subject/topic. */"
+    },
+    {
+      "lineIndex": 34,
+      "text": "  /** false when no suitable source exists; no alternative context is generated then. */"
+    }
+  ],
+  "src/types/providers.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * AI provider types and user keys."
+    },
+    {
+      "lineIndex": 5,
+      "text": " * Supported providers."
+    },
+    {
+      "lineIndex": 6,
+      "text": " * - \"openrouter\" and \"github-models\" are inactive placeholders for now."
+    },
+    {
+      "lineIndex": 7,
+      "text": " * - \"mock\" is a local development simulation tool and not an external AI provider;"
+    },
+    {
+      "lineIndex": 8,
+      "text": " *   its presence allows testing chat without real keys, and it can be disabled with a single flag."
+    },
+    {
+      "lineIndex": 19,
+      "text": " * User-specific API key."
+    },
+    {
+      "lineIndex": 20,
+      "text": " * Note: At this stage, it is temporarily stored in localStorage (see"
+    },
+    {
+      "lineIndex": 21,
+      "text": " * lib/ai-providers/user-keys-storage.ts). Later, it will be replaced with encrypted storage via Supabase."
+    },
+    {
+      "lineIndex": 30,
+      "text": "  /** Creation date in ISO format. */"
+    },
+    {
+      "lineIndex": 35,
+      "text": " * A secure version of the key suitable for display in the user interface."
+    },
+    {
+      "lineIndex": 36,
+      "text": " * Never contains the raw key value."
+    },
+    {
+      "lineIndex": 45,
+      "text": "  /** Masked preview like: ••••1234 */"
+    },
+    {
+      "lineIndex": 49,
+      "text": "/** Key status update resulting from an actual call attempt (e.g., quota exhaustion). */"
+    },
+    {
+      "lineIndex": 56,
+      "text": " * Credentials sent with the chat request."
+    },
+    {
+      "lineIndex": 57,
+      "text": " * Sending the key from the client is necessary only in the Mock phase because storage is in localStorage,"
+    },
+    {
+      "lineIndex": 58,
+      "text": " * and will later be replaced with secure fetching from the server side via Supabase."
+    }
+  ],
+  "src/types/sessions.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Domain types: Subjects, Sessions, and Session Errors."
+    },
+    {
+      "lineIndex": 4,
+      "text": "/** Valid subject IDs at this stage. */"
+    },
+    {
+      "lineIndex": 15,
+      "text": " * A study subject in the catalog."
+    },
+    {
+      "lineIndex": 16,
+      "text": " * - \"name\": Standard Latin name (appears in technical contexts)."
+    },
+    {
+      "lineIndex": 17,
+      "text": " * - \"nameAr\": Arabic display name."
+    },
+    {
+      "lineIndex": 18,
+      "text": " * Additional fields (like description) are optional UI extensions."
+    },
+    {
+      "lineIndex": 26,
+      "text": "  /** Inactive subjects are not displayed and no sessions are created for them. */"
+    },
+    {
+      "lineIndex": 33,
+      "text": "/** A single tutoring session, linked to only one subject throughout its lifetime. */"
+    },
+    {
+      "lineIndex": 40,
+      "text": "  /** Start date in ISO format. */"
+    },
+    {
+      "lineIndex": 42,
+      "text": "  /** End date in ISO format if it exists. */"
+    },
+    {
+      "lineIndex": 46,
+      "text": "/** Session domain errors. */"
+    }
+  ],
+  "src/types/tutor.ts": [
+    {
+      "lineIndex": 1,
+      "text": " * Tutor chat types: messages and error codes."
+    },
+    {
+      "lineIndex": 2,
+      "text": " * The response contract itself is defined in \"@/lib/tutor/tutor-response\"."
+    },
+    {
+      "lineIndex": 12,
+      "text": "/** Message displayed in the chat interface. */"
+    },
+    {
+      "lineIndex": 15,
+      "text": "  /** Send time in ISO format. */"
+    },
+    {
+      "lineIndex": 19,
+      "text": "/** Message status in the interface: sending, streaming, or failed. */"
+    },
+    {
+      "lineIndex": 22,
+      "text": "/** Chat interface message with its status if any. */"
+    },
+    {
+      "lineIndex": 27,
+      "text": "/** Standard chat errors understood by the interface. */"
+    }
+  ]
+}

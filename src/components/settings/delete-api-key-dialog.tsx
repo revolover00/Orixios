@@ -1,6 +1,6 @@
 /**
- * مربع حوار تأكيد حذف مفتاح.
- * يعرض التسمية والمعاينة المقنّعة فقط، ولا يعرض قيمة المفتاح أبدًا.
+ * Dialog to confirm key deletion.
+ * Displays only the label and masked preview, never the key value.
  */
 
 'use client';

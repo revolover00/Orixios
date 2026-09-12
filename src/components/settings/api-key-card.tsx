@@ -1,6 +1,6 @@
 /**
- * بطاقة مفتاح واحدة: الاسم، المزود، الحالة، التاريخ، الافتراضية،
- * ومعاينة مقنّعة فقط (لا تُعرض القيمة الكاملة أبدًا بعد الحفظ).
+ * Single key card: Name, Provider, Status, Date, Default,
+ * and only a masked preview (full value is never displayed after saving).
  */
 
 'use client';

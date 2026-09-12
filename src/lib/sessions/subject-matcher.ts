@@ -1,12 +1,12 @@
 /**
- * مطابقة اسم المادة المكتوب مع مواد الكتالوج.
+ * Matching the typed subject name with catalog subjects.
  *
- * الخوارزمية بسيطة عمدًا وقابلة للاستبدال لاحقًا (بمطابقة ضبابية أو
- * تصنيف آلي) مع الحفاظ على نفس التوقيع:
- * 1. تطبيع النص: قص المسافات، توحيد الحروف اللاتينية، وتطبيع عربي بسيط.
- * 2. تطابق تام مع اسم/بديل/معرّف ← "exact".
- * 3. تطابق جزئي (بداية اسم أو بداية بديل) ← "suggestions" فقط،
- *    دون اختيار تلقائي عند ضعف التطابق.
+ * The algorithm is intentionally simple and can be replaced later (with fuzzy matching or
+ * automated classification) while maintaining the same signature:
+ * 1. Normalize text: trim spaces, unify Latin characters, and simple Arabic normalization.
+ * 2. Exact match with name/alternative/ID → "exact".
+ * 3. Partial match (start of name or start of alternative) → "suggestions" only,
+ *    without automatic selection if the match is weak.
  */
 
 import type { Subject, SubjectId } from '@/types/sessions';
@@ -17,7 +17,7 @@ export interface SubjectNameMatch {
   suggestions: Subject[];
 }
 
-/** الطول الأدنى للنص حتى يُعتبر صالحًا للمطابقة الجزئية. */
+/** Minimum text length to be considered valid for partial matching. */
 const MIN_PARTIAL_LENGTH = 3;
 
 function normalizeText(value: string): string {
@@ -30,7 +30,7 @@ function normalizeText(value: string): string {
     .trim();
 }
 
-/** يجمع كل الأسماء المقبولة لمادة: المعرّف، الاسم القياسي، العربي، والبدائل. */
+/** Collects all accepted names for a subject: ID, standard name, Arabic name, and alternatives. */
 function collectNames(subject: Subject): string[] {
   return [subject.id, subject.name, subject.nameAr, ...getSubjectAliases(subject.id)].map(
     normalizeText,
@@ -47,8 +47,8 @@ function isPartialMatch(normalizedInput: string, subject: Subject): boolean {
 }
 
 /**
- * يطابق اسم مادة مكتوبًا مع الكتالوج.
- * لا يختار مادة تلقائيًا عند غياب التطابق الواضح.
+ * Matches a typed subject name with the catalog.
+ * Does not automatically select a subject if there is no clear match.
  */
 export function matchSubjectName(input: string): SubjectNameMatch {
   const normalizedInput = normalizeText(input);
@@ -56,7 +56,7 @@ export function matchSubjectName(input: string): SubjectNameMatch {
     return { exact: null, suggestions: [] };
   }
 
-  // 1) تطابق تام.
+  // 1) Exact match.
   const directSubject = getSubjectById(normalizedInput);
   if (directSubject) {
     return { exact: directSubject, suggestions: [] };
@@ -67,7 +67,7 @@ export function matchSubjectName(input: string): SubjectNameMatch {
     }
   }
 
-  // 2) تطابق جزئي: اقتراحات فقط دون حسم تلقائي.
+  // 2) Partial match: suggestions only without automatic resolution.
   const suggestions = getAllSubjects().filter((subject) =>
     isPartialMatch(normalizedInput, subject),
   );
@@ -75,7 +75,7 @@ export function matchSubjectName(input: string): SubjectNameMatch {
   return { exact: null, suggestions };
 }
 
-/* ------------------------- واجهة توافقية قديمة ------------------------- */
+/* ------------------------- Old Compatible Interface ------------------------- */
 
 export interface SubjectMatchResult {
   matched: boolean;
@@ -84,8 +84,8 @@ export interface SubjectMatchResult {
 }
 
 /**
- * متوافق مع الاستدعاءات القديمة: يعيد فقط التطابقات التامة،
- * ويُبنى داخليًا فوق matchSubjectName.
+ * Compatible with old calls: returns only exact matches,
+ * and is internally built on top of matchSubjectName.
  */
 export function resolveSubjectFromText(rawText: string): SubjectMatchResult {
   const match = matchSubjectName(rawText);

@@ -1,6 +1,6 @@
 /**
- * أنواع المعرفة الموثوقة + علامات التغليف داخل الـ prompt.
- * الأنواع الأساسية معرفة في "@/types/grounded-content".
+ * Grounded knowledge types + wrapping tags within the prompt.
+ * Basic types are defined in "@/types/grounded-content".
  */
 
 export type {
@@ -9,6 +9,6 @@ export type {
   GroundedSourceType,
 } from '@/types/grounded-content';
 
-/** علامات تُستخدم لتغليف المصادر داخل الـ system prompt وتمكين مزود المحاكاة من قراءتها. */
+/** Tags used to wrap sources within the system prompt and enable the simulation provider to read them. */
 export const GROUNDED_SOURCES_START = '<<GROUNDED_SOURCES>>';
 export const GROUNDED_SOURCES_END = '<<END_GROUNDED_SOURCES>>';

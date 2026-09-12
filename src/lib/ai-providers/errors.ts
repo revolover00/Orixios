@@ -1,10 +1,10 @@
 /**
- * أخطاء مزودي الذكاء الاصطناعي وتصنيفها.
+ * AI provider errors and their classification.
  *
- * قواعد صارمة:
- * - الرسائل المعروضة عامة وآمنة فقط؛ لا يُسرَّب نص الخطأ الخام ولا أي مفتاح
- *   إلى الواجهة. التفاصيل الخام تُحفَظ في cause للاستخدام الخادمي الداخلي.
- * - لا تُطبع الأخطاء أو المفاتيح في console في أي مسار.
+ * Strict rules:
+ * - Displayed messages are general and safe only; raw error text or any key is not leaked
+ *   to the interface. Raw details are stored in 'cause' for internal server-side use.
+ * - Errors or keys are not printed to the console in any path.
  */
 
 import type { ProviderName } from '@/types/providers';
@@ -22,7 +22,7 @@ const RETRYABLE_CODES: ReadonlySet<ProviderErrorCode> = new Set<ProviderErrorCod
   'NETWORK_ERROR',
 ]);
 
-/** رسائل عامة آمنة للعرض — لا تتضمن أي تفاصيل خام. */
+/** Safe general messages for display — do not include any raw details. */
 const SAFE_MESSAGES: Record<ProviderErrorCode, string> = {
   NO_API_KEY: 'لا يوجد مفتاح متاح للاستخدام.',
   INVALID_API_KEY: 'المفتاح غير صالح أو غير مصرح له.',
@@ -36,7 +36,7 @@ export interface ProviderErrorOptions {
   provider?: ProviderName;
   keyId?: string;
   cause?: unknown;
-  /** رسالة عامة آمنة فقط. لا تمرر نصوصًا خام أو أسرارًا. */
+  /** Safe general message only. Do not pass raw texts or secrets. */
   message?: string;
 }
 
@@ -61,8 +61,8 @@ export function isRetryableProviderError(error: unknown): boolean {
 }
 
 /**
- * هل الخطأ ناتج عن إلغاء المستخدم للطلب؟
- * الإلغاء ليس خطأ دائمًا، ولا يغيّر حالة المفتاح، ولا يُصنَّف كخطأ شبكة.
+ * Is the error caused by the user canceling the request?
+ * Cancellation is not always an error, does not change the key status, and is not classified as a network error.
  */
 export function isAbortError(error: unknown): boolean {
   if (!(error instanceof Error)) {
@@ -96,14 +96,14 @@ function readStatusCode(error: ErrorLike): number | null {
 }
 
 /**
- * يصنّف أي خطأ قادم من مزود (أو من AI SDK) إلى ProviderError برمز محدد.
+ * Classifies any error coming from a provider (or from AI SDK) into a ProviderError with a specific code.
  *
- * - 401/403 أو Unauthorized ← INVALID_API_KEY (غير قابل لإعادة المحاولة)
- * - 429 أو حصص/حدود معدل ← QUOTA_EXCEEDED (قابل لإعادة المحاولة بمفتاح آخر)
- * - أعطال الشبكة ← NETWORK_ERROR (مؤقت، دون تغيير حالة المفتاح)
- * - غير ذلك ← PROVIDER_NOT_CONFIGURED برسالة عامة
+ * - 401/403 or Unauthorized → INVALID_API_KEY (not retryable)
+ * - 429 or quotas/rate limits → QUOTA_EXCEEDED (retryable with another key)
+ * - Network failures → NETWORK_ERROR (temporary, without changing key status)
+ * - Otherwise → PROVIDER_NOT_CONFIGURED with a general message
  *
- * الرسالة الناتجة عامة دائمًا؛ الخطأ الخام يبقى في cause داخليًا فقط.
+ * The resulting message is always general; the raw error remains in 'cause' internally only.
  */
 export function classifyProviderError(error: unknown, provider?: ProviderName): ProviderError {
   if (error instanceof ProviderError) {

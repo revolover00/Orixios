@@ -1,13 +1,13 @@
 /**
- * POST /api/tutor — واجهة شات المدرّس.
+ * POST /api/tutor — Tutor chat interface.
  *
- * هذا الملف طبقة HTTP رفيعة فقط:
- * - قراءة الجسم والتحقق منه عبر Zod (400 آمن عند الفشل).
- * - تفويض منطق العمل كاملًا إلى "tutor-service".
- * - ترجمة النتيجة إلى استجابة JSON بحالة HTTP المناسبة.
+ * This file is only a thin HTTP layer:
+ * - Reads and validates the body via Zod (safe 400 on failure).
+ * - Delegates all business logic to "tutor-service".
+ * - Translates the result into a JSON response with the appropriate HTTP status.
  *
- * قواعد: لا تُسجَّل رسائل الطالب ولا المفاتيح ولا الـ prompt في السجلات،
- * ولا تُكشف أي تفاصيل داخلية في الاستجابات.
+ * Rules: Student messages, keys, and prompts are not logged,
+ * and no internal details are exposed in responses.
  */
 
 import { NextResponse } from 'next/server';
@@ -48,11 +48,11 @@ export async function POST(request: Request) {
     return NextResponse.json(response, { status: httpStatusForResponse(response) });
   }
 
-  /* ------------------------- مسار البث (stream: true) ------------------------ */
+  /* ------------------------- Streaming path (stream: true) ------------------------ */
   if (parsed.data.stream === true) {
     try {
-      // كل التحقق واختيار المفتاح يحدث داخل الخدمة قبل بدء البث؛
-      // إشارة إلغاء الاتصال تُمرر إلى المزود لإيقاف الاستهلاك.
+      // All validation and key selection happens within the service before streaming starts;
+      // the abort signal is passed to the provider to stop consumption.
       const outcome = await startTutorStream(toTutorRequest(parsed.data), {
         signal: request.signal,
       });
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
               controller.enqueue(encoder.encode(encodeSseEvent(event)));
             }
           } catch {
-            // خطأ غير متوقع أثناء الكتابة: نغلق البث بهدوء دون تسريب تفاصيل.
+            // Unexpected error during writing: we close the stream gracefully without leaking details.
           } finally {
             controller.close();
           }
@@ -91,12 +91,12 @@ export async function POST(request: Request) {
     }
   }
 
-  /* ---------------------- المسار العادي (غير التدفقي) ---------------------- */
+  /* ---------------------- Normal path (non-streaming) ---------------------- */
   try {
     const response = await processTutorRequest(toTutorRequest(parsed.data));
     return NextResponse.json(response, { status: httpStatusForResponse(response) });
   } catch {
-    // أي استثناء غير متوقع: استجابة عامة آمنة بحالة 500، بلا تفاصيل داخلية.
+    // Any unexpected exception: a safe generic 500 response, without internal details.
     const response = buildErrorResponse(unknownErrorToTutorError());
     return NextResponse.json(response, { status: httpStatusForResponse(response) });
   }

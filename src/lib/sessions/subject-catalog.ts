@@ -1,12 +1,12 @@
 /**
- * كتالوج المواد المؤقت.
+ * Temporary subject catalog.
  *
- * هذا الملف هو المكان الوحيد الذي تُعرَّف فيه أسماء المواد وبدائلها
- * (لتسهيل تعديلها أو إضافة مواد جديدة). لا يوضع منطق المواد داخل
- * مكوّنات React، ولا يعتمد الكتالوج على أي بيانات مستخدم.
+ * This file is the only place where subject names and their alternatives are defined
+ * (to facilitate their modification or addition of new subjects). Subject logic is not placed within
+ * React components, and the catalog does not rely on any user data.
  *
- * لاحقًا يمكن استبدال هذا الكتالوج بجدول في Supabase مع الحفاظ
- * على نفس الدوال.
+ * Later, this catalog can be replaced with a Supabase table while maintaining
+ * the same functions.
  */
 
 import type { Subject, SubjectId } from '@/types/sessions';
@@ -51,8 +51,8 @@ const SUBJECT_CATALOG: readonly Subject[] = [
 ];
 
 /**
- * أسماء شائعة وبديلة لكل مادة، تُستخدم في مطابقة الاسم المكتوب.
- * تُحرَّر هنا فقط، في نفس ملف الكتالوج.
+ * Common and alternative names for each subject, used in matching the typed name.
+ * Edited here only, in the same catalog file.
  */
 export const SUBJECT_NAME_ALIASES: Record<SubjectId, readonly string[]> = {
   mathematics: ['الرياضيات', 'رياضيات', 'رياضه', 'حساب', 'الجبر', 'جبر', 'math', 'maths', 'mathematics', 'algebra'],
@@ -61,14 +61,14 @@ export const SUBJECT_NAME_ALIASES: Record<SubjectId, readonly string[]> = {
   arabic: ['اللغة العربية', 'لغة عربية', 'العربية', 'عربية', 'عربي', 'اللغه العربيه', 'نحو', 'النحو', 'arabic'],
 };
 
-/** كل المواد النشطة فقط. */
+/** All active subjects only. */
 export function getAllSubjects(): Subject[] {
   return SUBJECT_CATALOG.filter((subject) => subject.isActive);
 }
 
 /**
- * البحث عن مادة بالمعرّف.
- * لا تُرجع مادة غير موجودة، ولا مادة غير نشطة.
+ * Search for a subject by ID.
+ * Does not return a non-existent subject, nor an inactive subject.
  */
 export function getSubjectById(subjectId: string): Subject | null {
   const found = SUBJECT_CATALOG.find(
@@ -77,12 +77,12 @@ export function getSubjectById(subjectId: string): Subject | null {
   return found ?? null;
 }
 
-/** حارس نوع لمعرّفات المواد الصالحة والنشطة فقط. */
+/** Type guard for valid and active subject IDs only. */
 export function isValidSubjectId(subjectId: string): subjectId is SubjectId {
   return getSubjectById(subjectId) !== null;
 }
 
-/** بدائل الأسماء لمادة معينة (للاستخدام في المطابقة). */
+/** Alternative names for a specific subject (for use in matching). */
 export function getSubjectAliases(subjectId: SubjectId): readonly string[] {
   return SUBJECT_NAME_ALIASES[subjectId];
 }

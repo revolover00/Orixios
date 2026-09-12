@@ -1,7 +1,7 @@
 /**
- * بروتوكول بث الشات (SSE).
+ * Chat streaming protocol (SSE).
  *
- * تنسيق الأحداث الثابت بين الخادم والعميل:
+ * Fixed event format between server and client:
  *
  *   event: token
  *   data: {"text":"..."}
@@ -12,9 +12,9 @@
  *   event: error
  *   data: {"code":"...","message":"...","retryable":true|false,"keyStatusUpdates":[..]}
  *
- * قواعد:
- * - لا تُرسل المفاتيح أو الـ system prompt أو السياق الموثوق في أي حدث.
- * - الأحداث غير المعروفة أو غير الصالحة تُتجاهل بأمان في العميل.
+ * Rules:
+ * - Keys, system prompt, or grounded context are not sent in any event.
+ * - Unknown or invalid events are safely ignored by the client.
  */
 
 import { API_KEY_STATUSES, type KeyStatusUpdate } from '@/types/providers';
@@ -41,7 +41,7 @@ export interface TutorStreamErrorEvent {
 
 export type TutorStreamEvent = TutorTokenEvent | TutorDoneEvent | TutorStreamErrorEvent;
 
-/** ترميز حدث واحد إلى كتلة SSE. */
+/** Encodes a single event into an SSE block. */
 export function encodeSseEvent(event: TutorStreamEvent): string {
   let payload: Record<string, unknown>;
   switch (event.type) {
@@ -67,7 +67,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-/** تحقق صارم من تحديثات حالات المفاتيح قبل استهلاكها. */
+/** Strict validation of key status updates before consumption. */
 export function parseKeyStatusUpdatesSafe(value: unknown): KeyStatusUpdate[] {
   if (!Array.isArray(value)) {
     return [];
@@ -106,8 +106,8 @@ function parseUsageSafe(value: unknown): ProviderUsage | undefined {
 }
 
 /**
- * تحليل كتلة SSE واحدة إلى حدث متحقق منه.
- * ترجع "null" لأي حدث غير معروف أو بيانات غير صالحة (تُتجاهل بأمان).
+ * Parses a single SSE block into a validated event.
+ * Returns "null" for any unknown event or invalid data (safely ignored).
  */
 export function parseSseBlock(block: string): TutorStreamEvent | null {
   let eventName = '';
@@ -161,6 +161,6 @@ export function parseSseBlock(block: string): TutorStreamEvent | null {
     };
   }
 
-  // حدث غير معروف: يُتجاهل بأمان.
+  // Unknown event: safely ignored.
   return null;
 }

@@ -1,16 +1,16 @@
 /**
- * طبقة العميل للاتصال بواجهة الشات وواجهة الجلسات.
+ * Client layer for connecting to the chat interface and session interfaces.
  *
- * قواعد:
- * - كل منطق الطلب هنا، وليس داخل مكوّنات العرض.
- * - يتم التحقق من شكل أي استجابة قبل استخدامها في الواجهة.
- * - لا تُعرض أو تُسجَّل المفاتيح أو الردود الحساسة في أي مكان.
- * - لا تُرسل رسائل "system" أو "developer" أو "tool" من الواجهة أبدًا؛
- *   دورا الرسائل الوحيدان الممكنان من المتصفح هما "user" و"assistant".
+ * Rules:
+ * - All request logic is here, not within display components.
+ * - The shape of any response is validated before being used in the interface.
+ * - Keys or sensitive responses are not displayed or logged anywhere.
+ * - "system", "developer", or "tool" messages are never sent from the interface;
+ *   the only two possible message roles from the browser are "user" and "assistant".
  *
- * ملاحظة حول حقل "keys": تُجمَع المفاتيح الصالحة من طبقة التخزين
- * (مرحلة التطوير الحالية) ولا تُشتق من مدخلات المستخدم لكل رسالة،
- * وستنتقل لاحقًا إلى جلب آمن عبر Supabase من جهة الخادم.
+ * Note on the "keys" field: Valid keys are collected from the storage layer
+ * (current development phase) and are not derived from user input for each message,
+ * and will later transition to secure fetching via Supabase from the server side.
  */
 
 import { API_KEY_STATUSES, type KeyStatusUpdate, type UserKeyCredential } from '@/types/providers';
@@ -32,7 +32,7 @@ export interface CreateSessionResult {
   subjectName: string;
 }
 
-/** خطأ نقل/استجابة غير صالحة — لا يكشف تفاصيل داخلية. */
+/** Invalid transfer/response error — does not reveal internal details. */
 export class TutorClientError extends Error {
   constructor(message: string) {
     super(message);
@@ -58,7 +58,7 @@ function parseUsage(value: unknown): TutorUsage | undefined {
   return usage.inputTokens !== undefined || usage.outputTokens !== undefined ? usage : undefined;
 }
 
-/** تحقق صارم من تحديثات حالات المفاتيح قبل تمريرها لطبقة التخزين. */
+/** Strict validation of key status updates before passing them to the storage layer. */
 function parseKeyStatusUpdates(value: unknown): KeyStatusUpdate[] {
   if (!Array.isArray(value)) {
     return [];
@@ -83,8 +83,8 @@ function parseKeyStatusUpdates(value: unknown): KeyStatusUpdate[] {
 }
 
 /**
- * التحقق الصارم من شكل استجابة /api/tutor قبل استخدامها.
- * ترجع "null" لأي شكل غير متوقع حتى لا تُستهلك بيانات غير موثوقة.
+ * Strict validation of the /api/tutor response shape before using it.
+ * Returns "null" for any unexpected shape so that untrusted data is not consumed.
  */
 export function parseTutorApiResponse(raw: unknown): TutorApiResponse | null {
   if (!isRecord(raw) || typeof raw.success !== 'boolean') {
@@ -123,7 +123,7 @@ export function parseTutorApiResponse(raw: unknown): TutorApiResponse | null {
   return {
     success: false,
     error: {
-      // الأكواد غير المعروفة تمر كما هي وتعالجها الواجهة بمسار عام آمن.
+      // Unknown codes are passed as is and handled by the interface via a safe general path.
       code: error.code as TutorErrorCode,
       message: error.message,
       retryable: error.retryable === true,
@@ -158,14 +158,14 @@ export async function postTutorChat(payload: TutorChatPayload): Promise<TutorApi
   return parsed;
 }
 
-/* ------------------------------- مسار البث -------------------------------- */
+/* ------------------------------- Streaming Path -------------------------------- */
 
 export interface TutorStreamHandlers {
-  /** جزء نص جديد من رد المدرّس. */
+  /** New text part from the tutor's response. */
   onToken: (text: string) => void;
-  /** اكتمل البث بنجاح. */
+  /** Stream completed successfully. */
   onDone: (info: { usage?: TutorUsage; keyStatusUpdates: KeyStatusUpdate[] }) => void;
-  /** خطأ موحد (قبل البث أو أثناءه). */
+  /** Unified error (before or during streaming). */
   onError: (error: {
     code: string;
     message: string;
@@ -186,12 +186,12 @@ function isAbortLike(error: unknown, signal?: AbortSignal): boolean {
 }
 
 /**
- * إرسال طلب شات تدفقي وقراءة أحداثه.
+ * Sends a streaming chat request and reads its events.
  *
- * - لا يُستخدم "response.json()" لمسار البث؛ القراءة عبر SSE فقط.
- * - الأخطاء الموحدة قبل بدء البث تصل كـ JSON عادي وتُمرر إلى "onError".
- * - الإلغاء عبر AbortController لا يُعتبر خطأ ولا يستدعي أي معالج.
- * - التحقق من شكل كل حدث يتم قبل استهلاكه، وغير المعروف يُتجاهل بأمان.
+ * - "response.json()" is not used for the streaming path; reading is via SSE only.
+ * - Unified errors before streaming starts arrive as normal JSON and are passed to "onError".
+ * - Cancellation via AbortController is not considered an error and does not invoke any handler.
+ * - The shape of each event is validated before consumption, and unknown ones are safely ignored.
  */
 export async function streamTutorChat(
   payload: TutorChatPayload,
@@ -215,7 +215,7 @@ export async function streamTutorChat(
 
   const contentType = response.headers.get('content-type') ?? '';
   if (!contentType.includes('text/event-stream')) {
-    // خطأ موحد قبل بدء البث (استجابة JSON عادية).
+    // Unified error before streaming starts (normal JSON response).
     let raw: unknown;
     try {
       raw = await response.json();
@@ -240,7 +240,7 @@ export async function streamTutorChat(
   }
 
   const reader = response.body.getReader();
-  // فك ترميز تدريجي يحافظ على العربية وUTF-8 حتى مع انقسام الحروف بين الـ chunks.
+  // Progressive decoding that preserves Arabic and UTF-8 even when characters are split across chunks.
   const decoder = new TextDecoder();
   let buffer = '';
 
@@ -283,12 +283,12 @@ export async function streamTutorChat(
     try {
       reader.releaseLock();
     } catch {
-      // القفل محرر بالفعل.
+      // Lock is already released.
     }
   }
 }
 
-/** إنشاء جلسة جديدة لمادة، مع التحقق من شكل الاستجابة. */
+/** Creates a new session for a subject, with response shape validation. */
 export async function postCreateSession(subjectId: string): Promise<CreateSessionResult | null> {
   let response: Response;
   try {

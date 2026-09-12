@@ -1,8 +1,8 @@
 /**
- * أنواع طبقة مزودي الذكاء الاصطناعي (BYOK).
+ * AI provider layer types (BYOK).
  *
- * أنواع الـ مجال معرفة في "@/types/providers" وتُعاد هنا إعادة تصديرها
- * حتى تكون هذه الطبقة مكتفية ذاتيًا لمن يستوردها.
+ * Domain types are defined in "@/types/providers" and re-exported here
+ * so that this layer is self-contained for those who import it.
  */
 
 import type {
@@ -24,7 +24,7 @@ export type {
 
 export type { ProviderErrorCode } from './errors';
 
-/** إعداد مزود كما يظهر للسجلات والاختيار. */
+/** Provider configuration as it appears for logs and selection. */
 export interface ProviderConfig {
   name: ProviderName;
   displayName: string;
@@ -32,39 +32,39 @@ export interface ProviderConfig {
   supportsReasoning: boolean;
 }
 
-/** نتيجة اختيار ناجحة: المفتاح المختار + إعداد مزوده. */
+/** Successful selection result: the selected key + its provider configuration. */
 export interface ProviderSelectionResult {
   key: UserApiKey;
   provider: ProviderConfig;
 }
 
-/** خيارات اختيار المفتاح النشط. */
+/** Options for active key selection. */
 export interface GetActiveModelOptions {
-  /** البحث داخل مزود محدد فقط. */
+  /** Search only within a specific provider. */
   preferredProvider?: ProviderName;
   /**
-   * خيار صريح يسمح باستخدام مفتاح البيئة التطويري عند غياب مفاتيح المستخدم.
-   * لا يُحترم أبدًا إلا باجتماع شرطين: هذا الخيار = true و DEV_TESTING_MODE=true.
+   * Explicit option allowing the use of the development environment key when user keys are absent.
+   * Never honored unless two conditions are met: this option = true and DEV_TESTING_MODE=true.
    */
   allowDevEnvironmentFallback?: boolean;
   /**
-   * حقن المفاتيح مباشرة (للاختبار، أو لطلبات الخادم حيث تصل المفاتيح
-   * في جسم الطلب). عند الغياب تُقرأ من تخزين المستخدم.
+   * Inject keys directly (for testing, or for server requests where keys arrive
+   * in the request body). If absent, they are read from user storage.
    */
   keys?: readonly UserApiKey[];
 }
 
-/** خيارات دورة الأخطاء والانتقال بين المفاتيح. */
+/** Options for error rotation and key switching. */
 export interface KeyRotationOptions {
   keys: readonly UserApiKey[];
-  /** التنفيذ الفعلي مفصول عن منطق الاختيار (لا يخلط الاختيار بالإرسال). */
+  /** Actual execution is separated from selection logic (does not mix selection with sending). */
   invoke: (key: UserApiKey) => Promise<string>;
   preferredProvider?: ProviderName;
-  /** حد أقصى لعدد المفاتيح التي تُجرَّب في الطلب الواحد. */
+  /** Maximum number of keys to try in a single request. */
   maxAttempts?: number;
   /**
-   * خطاف اختياري لتطبيق تغيير الحالة فورًا (مثل التخزين المحلي في العميل).
-   * تحديثات الحالة تُجمع دائمًا في نتيجة الدورة أيضًا.
+   * Optional hook to apply state changes immediately (e.g., local storage in the client).
+   * State updates are always collected in the rotation result as well.
    */
   onKeyStatusChange?: (keyId: string, status: ApiKeyStatus) => void;
 }

@@ -1,22 +1,22 @@
 /**
- * تخزين مفاتيح المستخدم (طبقة abstraction مستقلة عن React).
+ * User key storage (React-independent abstraction layer).
  *
- * ⚠️ تحذير أمني مهم:
- * - التخزين في localStorage حل مؤقت للتطوير المحلي فقط، ولا يُعتبر آمنًا
- *   للإنتاج أبدًا (أي سكربت في الصفحة قادر على قراءة المفاتيح).
- * - مفاتيح الإنتاج يجب تخزينها بتشفير قوي عبر Backend/Supabase Vault،
- *   مع الحفاظ على نفس تواقيع هذه الطبقة حتى لا تتغير الجهات المستدعية.
- * - لا تُطبع المفاتيح أو قيمها في console في أي مسار من هذه الوحدة.
+ * ⚠️ Important security warning:
+ * - Storing in localStorage is a temporary solution for local development only, and is not considered secure
+ *   for production ever (any script on the page can read the keys).
+ * - Production keys must be stored with strong encryption via Backend/Supabase Vault,
+ *   while maintaining the same signatures for this layer so that callers do not change.
+ * - Keys or their values are not printed to the console in any path of this module.
  *
- * الحمايات المنفذة:
- * - العمل على الخادم حيث لا يوجد localStorage (إرجاع قوائم فارغة بأمان).
- * - JSON تالف داخل localStorage (تجاهل آمن).
- * - بيانات قديمة لا تطابق النوع الحالي (تعقيم كل مدخل قبل قبوله).
- * - وجود أكثر من مفتاح افتراضي (يُطبَّق افتراضي واحد فقط: الأول).
- * - مفتاح بدون provider صالح أو بدون apiKey (يُستبعد تمامًا).
+ * Implemented protections:
+ * - Operating on the server where localStorage does not exist (safely returning empty lists).
+ * - Corrupt JSON inside localStorage (safe disregard).
+ * - Old data that does not match the current type (sanitize each entry before accepting it).
+ * - Presence of more than one default key (only one default is applied: the first one).
+ * - Key without a valid provider or without an apiKey (completely excluded).
  *
- * اللقطات (Snapshots) مستقرة المرجع كي تعمل مع useSyncExternalStore
- * دون حلقات إعادة تصيير.
+ * Snapshots are referentially stable to work with useSyncExternalStore
+ * without re-rendering loops.
  */
 
 import {
@@ -31,7 +31,7 @@ import {
 
 const STORAGE_KEY = 'orixios.tutor.userApiKeys.v1';
 
-/** حدث يُبث عند أي تغيير حتى تحدّث الواجهات حالة القفل فورًا. */
+/** Event broadcast on any change so that interfaces immediately update the lock status. */
 export const API_KEYS_CHANGED_EVENT = 'orixios:api-keys-changed';
 
 export type KeyAccessState = 'READY' | 'NO_API_KEY' | 'ALL_KEYS_EXHAUSTED';
@@ -53,18 +53,18 @@ function isStorageAvailable(): boolean {
     return false;
   }
   try {
-    // في بعض الأوضاع (الخصوصية مثلًا) يرمي الوصول إلى التخزين استثناءً.
+    // In some modes (e.g., privacy), accessing storage throws an exception.
     return typeof window.localStorage !== 'undefined' && window.localStorage !== null;
   } catch {
     return false;
   }
 }
 
-/* ------------------------- تعقيم البيانات المخزنة ------------------------- */
+/* ------------------------- Stored Data Sanitization ------------------------- */
 
 /**
- * يفرض افتراضيًا واحدًا فقط: أول مفتاح يحمل isDefault يبقى افتراضيًا
- * والبقية تُصفَّر. يعالج البيانات القديمة أو المحررة يدويًا.
+ * Enforces only one default: the first key with isDefault remains default,
+ * and the rest are reset. Handles old or manually edited data.
  */
 function enforceSingleDefault(keys: UserApiKey[]): UserApiKey[] {
   let defaultSeen = false;
@@ -81,9 +81,9 @@ function enforceSingleDefault(keys: UserApiKey[]): UserApiKey[] {
 }
 
 /**
- * تعقيم قيمة مقروءة من التخزين:
- * يستبعد أي مدخل ليس كائنًا، أو يفتقد id/provider/apiKey صالحة،
- * ويصحح الحقول الاختيارية، ثم يفرض افتراضيًا واحدًا.
+ * Sanitize a value read from storage:
+ * Excludes any entry that is not an object, or lacks a valid id/provider/apiKey,
+ * corrects optional fields, then enforces a single default.
  */
 export function sanitizeStoredKeys(value: unknown): UserApiKey[] {
   if (!Array.isArray(value)) {
@@ -101,7 +101,7 @@ export function sanitizeStoredKeys(value: unknown): UserApiKey[] {
     const provider = record.provider;
     const id = typeof record.id === 'string' ? record.id.trim() : '';
 
-    // مفتاح بدون provider معروف أو بدون apiKey أو بدون id يُستبعد بالكامل.
+    // A key without a known provider, or without an apiKey, or without an id is completely excluded.
     if (
       apiKey.length === 0 ||
       id.length === 0 ||
@@ -133,30 +133,30 @@ export function sanitizeStoredKeys(value: unknown): UserApiKey[] {
   return enforceSingleDefault(sanitized);
 }
 
-/* ---------------------- ذاكرة مؤقتة للقطة المستقرة ----------------------- */
+/* ---------------------- Stable Snapshot Cache ----------------------- */
 
 let cachedRaw: string | null = null;
 let cachedKeys: UserApiKey[] = [];
 let cachedPublic: PublicUserApiKey[] = [];
 /**
- * وضع "الذاكرة فقط": يُفعَّل عند فشل الكتابة الأخيرة، فتُخدم القراءات
- * من الذاكرة المؤقتة (نية المستخدم الأخيرة) حتى تنجح كتابة تالية.
+ * "Memory-only" mode: activated when the last write failed, so reads are served
+ * from the cache (the user's last intention) until a subsequent write succeeds.
  */
 let memoryOnly = false;
 
-/** يحدّث الذاكرة المؤقتة فقط إذا تغيّرت القيمة الخام في التخزين. */
+/** Updates the cache only if the raw value in storage has changed. */
 function refreshCache(): UserApiKey[] {
   if (memoryOnly) {
-    // كتابة سابقة فشلت: نُبقي حالة الذاكرة المؤقتة مصدرًا للحقيقة
-    // بدل قراءة قيمة قديمة من التخزين وإظهار اختفاء المفاتيح.
+    // Previous write failed: We keep the cache state as the source of truth
+    // instead of reading an old value from storage and showing keys disappearing.
     return cachedKeys;
   }
   let raw = '';
   try {
     raw = window.localStorage.getItem(STORAGE_KEY) ?? '';
   } catch {
-    // فشل وصول التخزين: نعيد آخر لقطة صالحة دون كسر التطبيق،
-    // ولا تُضمَّن أي قيم مفاتيح في أي مسار خطأ.
+    // Storage access failed: We return the last valid snapshot without breaking the application,
+    // and no key values are included in any error path.
     return cachedKeys;
   }
   if (raw !== cachedRaw) {
@@ -166,7 +166,7 @@ function refreshCache(): UserApiKey[] {
       try {
         parsed = JSON.parse(raw);
       } catch {
-        // JSON تالف: نتجاهله بأمان وكأن التخزين فارغ.
+        // Corrupt JSON: We safely ignore it as if storage were empty.
         parsed = [];
       }
     }
@@ -201,8 +201,8 @@ function writeKeys(keys: UserApiKey[]): void {
     cachedRaw = raw;
     memoryOnly = false;
   } catch {
-    // فشل الكتابة (مثل امتلاء التخزين): نُبقي الحالة في الذاكرة المؤقتة
-    // حتى لا تنكسر الواجهة، مع تجاهل الخطأ بأمان (بلا قيم مفاتيح في أي سجل).
+    // Write failed (e.g., storage full): We keep the state in the cache
+    // so the interface doesn't break, safely ignoring the error (no key values in any log).
     memoryOnly = true;
   }
   cachedKeys = normalized;
@@ -210,23 +210,23 @@ function writeKeys(keys: UserApiKey[]): void {
   emitKeysChanged();
 }
 
-/* ------------------------------ القراءة ---------------------------------- */
+/* ------------------------------ Reading ---------------------------------- */
 
 export function listApiKeys(): UserApiKey[] {
   return readKeys();
 }
 
-/** المفاتيح النشطة فقط (بصرف النظر عن المزود). */
+/** Active keys only (regardless of provider). */
 export function getActiveApiKeys(): UserApiKey[] {
   return readKeys().filter((key) => key.status === 'active');
 }
 
-/** المفتاح الافتراضي إن وُجد (بعد التعقيم يوجد افتراضي واحد على الأكثر). */
+/** The default key if it exists (after sanitization, there is at most one default). */
 export function getDefaultApiKey(): UserApiKey | undefined {
   return readKeys().find((key) => key.isDefault);
 }
 
-/** المفاتيح النشطة مرتبة بالأولوية: الافتراضي أولًا ثم حسب تاريخ الإنشاء. */
+/** Active keys sorted by priority: default first, then by creation date. */
 export function listUsableApiKeys(): UserApiKey[] {
   const active = getActiveApiKeys();
   const sorted = [...active].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -248,18 +248,18 @@ export function evaluateKeyAccess(keys: readonly UserApiKey[] = readKeys()): Key
   return 'READY';
 }
 
-/* --------------------------- الاشتراك واللقطات --------------------------- */
+/* --------------------------- Subscription and Snapshots --------------------------- */
 
 /**
- * اشتراك في تغييرات المفاتيح (تغيير محلي + تبويبات أخرى)،
- * مصمم للعمل مباشرة مع useSyncExternalStore.
+ * Subscribe to key changes (local change + other tabs),
+ * designed to work directly with useSyncExternalStore.
  */
 export function subscribeToApiKeysChanges(listener: () => void): () => void {
   if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
     return () => {};
   }
   const onStorageFromOtherTab = () => {
-    cachedRaw = null; // إبطال الذاكرة المؤقتة ثم إشعار المستمع
+    cachedRaw = null; // Invalidate cache then notify listener
     listener();
   };
   window.addEventListener(API_KEYS_CHANGED_EVENT, listener);
@@ -270,7 +270,7 @@ export function subscribeToApiKeysChanges(listener: () => void): () => void {
   };
 }
 
-/** لقطة المفاتيح العامة (مستقرة المرجع) للعرض في الواجهة. */
+/** General keys snapshot (referentially stable) for display in the interface. */
 export function getPublicApiKeysSnapshot(): PublicUserApiKey[] {
   if (!isStorageAvailable()) {
     return EMPTY_PUBLIC_KEYS;
@@ -279,22 +279,22 @@ export function getPublicApiKeysSnapshot(): PublicUserApiKey[] {
   return cachedPublic;
 }
 
-/** لقطة الخادم: قائمة فارغة ثابتة. */
+/** Server snapshot: a fixed empty list. */
 export function getEmptyPublicApiKeys(): PublicUserApiKey[] {
   return EMPTY_PUBLIC_KEYS;
 }
 
-/** لقطة حالة الوصول (نص بدائي، مستقر بطبيعته). */
+/** Access status snapshot (primitive text, inherently stable). */
 export function getKeyAccessSnapshot(): KeyAccessState {
   return evaluateKeyAccess();
 }
 
-/** لقطة الخادم لحالة الوصول. */
+/** Server snapshot for access status. */
 export function getDefaultKeyAccess(): KeyAccessState {
   return 'READY';
 }
 
-/* ------------------------------- الكتابة --------------------------------- */
+/* ------------------------------- Writing --------------------------------- */
 
 export function addApiKey(input: AddApiKeyInput): UserApiKey {
   const keys = readKeys();
@@ -312,10 +312,10 @@ export function addApiKey(input: AddApiKeyInput): UserApiKey {
 }
 
 /**
- * حذف مفتاح بأمان:
- * - حذف مفتاح عادي لا يكسر الواجهة.
- * - إذا كان المحذوف هو الافتراضي، يُرقَّى أقدم مفتاح نشط (أو أقدم مفتاح
- *   إجمالًا) ليكون الافتراضي الجديد، بدل ترك النظام بلا افتراضي مقصود.
+ * Safely delete a key:
+ * - Deleting a normal key does not break the interface.
+ * - If the deleted key was the default, the oldest active key (or oldest key
+ *   overall) is promoted to be the new default, instead of leaving the system without an intended default.
  */
 export function deleteApiKey(id: string): void {
   const keys = readKeys();
@@ -338,7 +338,7 @@ export function deleteApiKey(id: string): void {
   writeKeys(remaining);
 }
 
-/** يحدد المفتاح الافتراضي مع تصفير أي افتراضيات أخرى. */
+/** Sets the default key while resetting any other defaults. */
 export function setDefaultApiKey(id: string): void {
   writeKeys(readKeys().map((key) => ({ ...key, isDefault: key.id === id })));
 }
@@ -347,7 +347,7 @@ export function updateApiKeyStatus(id: string, status: ApiKeyStatus): void {
   writeKeys(readKeys().map((key) => (key.id === id ? { ...key, status } : key)));
 }
 
-/** إعادة تسمية مفتاح موجود؛ ترجع false إذا تعذر ذلك. */
+/** Renames an existing key; returns false if unsuccessful. */
 export function renameApiKey(id: string, label: string): boolean {
   const trimmedLabel = label.trim();
   if (trimmedLabel.length === 0) {
@@ -362,8 +362,8 @@ export function renameApiKey(id: string, label: string): boolean {
 }
 
 /**
- * كشف تكرار قيمة مفتاح لمزود معيّن قبل الحفظ.
- * الرسالة الناتجة عن التكرار في الواجهة لا تكشف القيمة نفسها أبدًا.
+ * Detects duplicate key values for a specific provider before saving.
+ * The resulting message about duplication in the interface never reveals the value itself.
  */
 export function hasDuplicateApiKey(provider: ProviderName, apiKey: string): boolean {
   const trimmedKey = apiKey.trim();
@@ -373,7 +373,7 @@ export function hasDuplicateApiKey(provider: ProviderName, apiKey: string): bool
   return readKeys().some((key) => key.provider === provider && key.apiKey === trimmedKey);
 }
 
-/** تطبيق تحديثات الحالة القادمة من الخادم (مثل تعليم مفتاح مستنفد). */
+/** Applies state updates coming from the server (e.g., marking a key as exhausted). */
 export function applyKeyStatusUpdates(updates: readonly KeyStatusUpdate[]): void {
   if (updates.length === 0) {
     return;
@@ -387,12 +387,12 @@ export function applyKeyStatusUpdates(updates: readonly KeyStatusUpdate[]): void
   );
 }
 
-/* ------------------------------ العرض الآمن ------------------------------ */
+/* ------------------------------ Safe Display ------------------------------ */
 
 /**
- * إخفاء المفتاح للعرض في الواجهة.
- * مثال: "AIza••••••••••1234" — أول 4 محارف وآخر 4 فقط.
- * المفاتيح القصيرة (8 محارف فأقل) تُقنَّع بالكامل حتى لا تُستنتج.
+ * Masks the key for display in the interface.
+ * Example: "AIza••••••••••1234" — only the first 4 and last 4 characters.
+ * Short keys (8 characters or less) are fully masked so they cannot be inferred.
  */
 export function maskApiKey(apiKey: string): string {
   const value = apiKey.trim();
@@ -402,7 +402,7 @@ export function maskApiKey(apiKey: string): string {
   return `${value.slice(0, 4)}${MASK_FILL}${value.slice(-4)}`;
 }
 
-/** نسخة آمنة للواجهة: لا تحتوي القيمة الخام للمفتاح إطلاقًا. */
+/** Safe version for the interface: never contains the raw key value. */
 export function toPublicApiKey(key: UserApiKey): PublicUserApiKey {
   return {
     id: key.id,

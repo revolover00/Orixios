@@ -1,5 +1,5 @@
 /**
- * قائمة بطاقات المفاتيح مع حالة "لا توجد مفاتيح".
+ * List of key cards with a "no keys" state.
  */
 
 'use client';

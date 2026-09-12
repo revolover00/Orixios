@@ -1,11 +1,11 @@
 /**
- * صفحة إدارة مفاتيح مزودي الذكاء الاصطناعي (مرحلة التطوير).
+ * AI Provider Keys Management Page (Development Phase).
  *
- * - التخزين في طبقة مستقلة عن المكونات (user-keys-storage) عبر
- *   اشتراك تفاعلي مستقر يعمل مع التصيير الخادمي دون أخطاء "window".
- * - القيمة الكاملة للمفتاح لا تُعرض بعد الحفظ أبدًا.
- * - حالات "مستنفد" و"غير صالح" تُحدَّث تلقائيًا من طبقة BYOK عبر
- *   الاستخدام الفعلي في الشات، وليس من هذه الصفحة مباشرة.
+ * - Storage in a component-independent layer (user-keys-storage) via
+ *   a stable reactive subscription that works with server-side rendering without "window" errors.
+ * - The full key value is never displayed after saving.
+ * - "Exhausted" and "Invalid" statuses are updated automatically from the BYOK layer via
+ *   actual usage in the chat, not directly from this page.
  */
 
 'use client';
@@ -30,8 +30,8 @@ import {
 import type { PublicUserApiKey } from '@/types/providers';
 
 export default function ApiKeysSettingsPage() {
-  // المفاتيح حالة خارجية تُقرأ باشتراك تفاعلي، مع لقطة خادم فارغة
-  // حتى يتطابق التصيير الأولي ثم يتحدث تلقائيًا بعد التحميل.
+  // Keys are an external state read via a reactive subscription, with an empty server snapshot
+  // so that the initial render matches, then it updates automatically after loading.
   const keys = useSyncExternalStore(
     subscribeToApiKeysChanges,
     getPublicApiKeysSnapshot,

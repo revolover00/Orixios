@@ -1,11 +1,11 @@
 /**
- * نموذج إضافة مفتاح جديد.
+ * Form for adding a new key.
  *
- * - التحقق عبر Zod (مزود مطلوب، تسمية غير فارغة، مفتاح غير فارغ).
- * - منع حفظ مفتاح لمزود غير مفعّل، ومنع تكرار نفس المفتاح برسالة
- *   لا تكشف القيمة.
- * - لا يُعرض المفتاح كاملًا بعد الحفظ، ويُمسح الحقل فور النجاح.
- * - لا يُرسَل المفتاح إلى أي خدمة خارجية من هذه الصفحة.
+ * - Validation via Zod (provider required, non-empty label, non-empty key).
+ * - Prevent saving a key for an inactive provider, and prevent duplicate keys with a message
+ *   that does not reveal the value.
+ * - The full key is not displayed after saving, and the field is cleared immediately upon success.
+ * - The key is not sent to any external service from this page.
  */
 
 'use client';
@@ -54,13 +54,13 @@ export function ApiKeyForm() {
     }
 
     const created = addApiKey(parsed.data);
-    // المفتاح الأول يصبح افتراضيًا تلقائيًا داخل طبقة التخزين،
-    // والخيار الصريح يفرض الافتراضية عند الحاجة.
+    // The first key automatically becomes default within the storage layer,
+    // and the explicit option enforces default when needed.
     if (makeDefault) {
       setDefaultApiKey(created.id);
     }
 
-    // مسح الحقل من الذاكرة البصرية فور نجاح الحفظ.
+    // Clear the field from visual memory immediately upon successful save.
     setLabel('');
     setApiKey('');
     setMakeDefault(false);

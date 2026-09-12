@@ -1,6 +1,6 @@
 /**
- * واجهة توافقية مع الاستيرادات القديمة.
- * المصدر الوحيد لبيانات المواد هو الآن "subject-catalog.ts".
+ * Compatibility interface with old imports.
+ * The only source for subject data is now "subject-catalog.ts".
  */
 
 import type { Subject, SubjectId } from '@/types/sessions';

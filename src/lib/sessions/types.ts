@@ -1,5 +1,5 @@
 /**
- * أنواع طبقة الجلسات: واجهة التخزين مفصولة عن منطق الجلسات.
+ * Session layer types: storage interface separated from session logic.
  */
 
 import type { TutorSession } from '@/types/sessions';
@@ -7,9 +7,9 @@ import type { TutorSession } from '@/types/sessions';
 export type { SessionStatus, SubjectId, TutorSession } from '@/types/sessions';
 
 /**
- * محوّل تخزين الجلسات.
- * التطبيق الحالي في الذاكرة؛ عند إضافة Supabase لاحقًا يُوفَّر تطبيق
- * آخر لنفس الواجهة دون أي تغيير في منطق الجلسات أو المستهلكين.
+ * Session storage adapter.
+ * Current implementation is in-memory; when Supabase is added later, another implementation
+ * will be provided for the same interface without any change in session logic or consumers.
  */
 export interface SessionStorage {
   list(): TutorSession[];
