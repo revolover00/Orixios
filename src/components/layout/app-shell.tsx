@@ -1,15 +1,8 @@
-/**
- * The general structure of the application: sidebar + main content area.
- * - Desktop: The sidebar is fixed.
- * - Phone: Transforms into a Drawer that opens with the menu button.
- * - Does not display data that does not actually exist (session history is empty until the feature is implemented).
- */
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { SUBJECTS } from '@/lib/sessions/subjects';
 
@@ -89,7 +82,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
       <div className="mt-5 px-4">
         <h2 className="mb-2 text-[11px] font-semibold text-muted-foreground">المواد</h2>
         <div className="flex flex-col gap-1">
-          {SUBJECTS.map((subject) => {
+          {SUBJECTS.map((subject, index) => {
             const href = `/session/${subject.id}`;
             return (
               <Link
@@ -138,25 +131,45 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = () => setMobileOpen(false);
 
+  // Close menu when pressing Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  // Prevent background scrolling when menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [mobileOpen]);
+
   return (
     <div className="flex h-dvh overflow-hidden bg-background text-foreground">
       {/* Sidebar — Desktop */}
-      <aside className="hidden w-72 shrink-0 border-e border-border bg-surface lg:block">
+      <aside className="hidden w-72 shrink-0 border-l border-border bg-surface lg:block">
         <SidebarContent onNavigate={closeMobile} />
       </aside>
 
-      {/* Sidebar — Phone (Drawer) */}
-      {mobileOpen ? (
+      {/* Sidebar — Phone (Drawer) Backdrop */}
+      {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-background/70 lg:hidden"
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={closeMobile}
           aria-hidden="true"
         />
-      ) : null}
+      )}
+
+      {/* Sidebar — Phone (Drawer) Content */}
       <aside
         aria-hidden={!mobileOpen}
-        className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-surface lg:hidden ${
-          mobileOpen ? 'translate-x-0' : 'pointer-events-none translate-x-full opacity-0'
+        className={`fixed inset-y-0 right-0 z-50 w-72 border-l border-border bg-surface lg:hidden transition-transform duration-300 ease-out ${
+          mobileOpen ? 'translate-x-0 shadow-2xl' : 'translate-x-full'
         }`}
       >
         <SidebarContent onNavigate={closeMobile} />

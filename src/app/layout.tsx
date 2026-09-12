@@ -20,10 +20,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${arabicFont.className} dark`}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
+<meta key="viewport" name="viewport" content="width=device-width, initial-scale=1" />
+<script key="theme-script" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+</head>
       <body className="bg-background text-foreground antialiased">
-        <AppShell>{children}</AppShell>
+        {children}
       </body>
     </html>
   );

@@ -1,13 +1,6 @@
-/**
- * Theme toggle button: Dark → Light → System → Dark.
- * - Saves the selection locally.
- * - Does not cause hydration mismatch (server snapshot is stable).
- * - Works with keyboard (real button) and has a clear label.
- */
-
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useSyncExternalStore, useState, useEffect } from 'react';
 import {
   getStoredThemeMode,
   setThemeMode,
@@ -31,12 +24,7 @@ function ModeIcon({ mode }: { mode: ThemeMode }) {
   if (mode === 'dark') {
     return (
       <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
-        <path
-          d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
+        <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
       </svg>
     );
   }
@@ -44,12 +32,7 @@ function ModeIcon({ mode }: { mode: ThemeMode }) {
     return (
       <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
         <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
-        <path
-          d="M12 2.5V5m0 14v2.5M2.5 12H5m14 0h2.5M5.3 5.3l1.8 1.8m9.8 9.8 1.8 1.8m0-13.4-1.8 1.8M7.1 16.9l-1.8 1.8"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
+        <path d="M12 2.5V5m0 14v2.5M2.5 12H5m14 0h2.5M5.3 5.3l1.8 1.8m9.8 9.8 1.8 1.8m0-13.4-1.8 1.8M7.1 16.9l-1.8 1.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       </svg>
     );
   }
@@ -67,6 +50,22 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
     getStoredThemeMode,
     () => 'dark' as ThemeMode,
   );
+
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground ${className}`}
+      >
+        <span className="sr-only">جاري التحميل...</span>
+      </button>
+    );
+  }
 
   return (
     <button
